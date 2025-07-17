@@ -27,12 +27,7 @@
         <table id="user-table">
             <thead>
                 <tr>
-                    <th>Full Name</th>
-                    <th>Contact</th>
-                    <th>Goal/Class</th>
-                    <th>Status</th>
-                    <th>Role</th>
-                    <th>Actions</th>
+                    <th>Full Name</th><th>Contact</th><th>Goal/Class</th><th>Status</th><th>Role</th><th>Actions</th>
                 </tr>
             </thead>
             <tbody id="user-list"></tbody>
@@ -42,15 +37,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script>
-        // ❗️❗️❗️ PASTE YOUR **REAL** FIREBASE CONFIG HERE TO FIX THE ERROR ❗️❗️❗️
+        // Your Firebase Config is now included below
         const firebaseConfig = {
-          apiKey: "AIzaSy...",
-          authDomain: "your-project-id.firebaseapp.com",
-          projectId: "your-project-id",
-          storageBucket: "your-project-id.appspot.com",
-          messagingSenderId: "...",
-          appId: "...",
-          measurementId: "..."
+            apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+            authDomain: "xperts-auth.firebaseapp.com",
+            projectId: "xperts-auth",
+            storageBucket: "xperts-auth.appspot.com",
+            messagingSenderId: "143568403446",
+            appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+            measurementId: "G-082839CKEM"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -64,41 +59,19 @@
                 const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
                 userListBody.innerHTML = '';
                 if (snapshot.empty) { userListBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>'; return; }
-
                 snapshot.forEach(doc => {
                     const userData = doc.data();
                     const tr = document.createElement('tr');
                     tr.setAttribute('data-id', doc.id);
                     const approvalStatus = userData.approved ? `<span style="color: green;">Approved</span>` : `<span style="color: orange;">Pending</span>`;
                     const approveButton = userData.approved ? '' : `<button class="action-btn approve" onclick="toggleApproval('${doc.id}', true)">Approve</button>`;
-                    tr.innerHTML = `
-                        <td>${userData.fullName}</td>
-                        <td>${userData.email}<br><small>${userData.mobile}</small></td>
-                        <td>${userData.goal || 'N/A'}${userData.class ? ' - ' + userData.class : ''}</td>
-                        <td>${approvalStatus}</td>
-                        <td>
-                            <select class="role-select" onchange="updateRole('${doc.id}', this.value)">
-                                <option value="student" ${userData.role === 'student' ? 'selected' : ''}>Student</option>
-                                <option value="teacher" ${userData.role === 'teacher' ? 'selected' : ''}>Teacher</option>
-                                <option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option>
-                            </select>
-                        </td>
-                        <td>${approveButton}</td>
-                    `;
+                    tr.innerHTML = `<td>${userData.fullName}</td><td>${userData.email}<br><small>${userData.mobile}</small></td><td>${userData.goal || 'N/A'}${userData.class ? ' - ' + userData.class : ''}</td><td>${approvalStatus}</td><td><select class="role-select" onchange="updateRole('${doc.id}', this.value)"><option value="student" ${userData.role === 'student' ? 'selected' : ''}>Student</option><option value="teacher" ${userData.role === 'teacher' ? 'selected' : ''}>Teacher</option><option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option></select></td><td>${approveButton}</td>`;
                     userListBody.appendChild(tr);
                 });
             } catch (error) { console.error("Error loading users: ", error); userListBody.innerHTML = '<tr><td colspan="6" style="color: red;">Error: Could not load users. Check Firebase config and console.</td></tr>'; }
         }
-        
-        async function toggleApproval(userId, newStatus) {
-            const button = event.target; button.disabled = true;
-            try { await db.collection('users').doc(userId).update({ approved: newStatus }); loadUsers(); } 
-            catch (error) { console.error("Error updating approval:", error); alert("Failed to update approval status."); button.disabled = false; }
-        }
-        async function updateRole(userId, newRole) {
-            try { await db.collection('users').doc(userId).update({ role: newRole }); alert('Role updated successfully!'); } 
-            catch (error) { console.error("Error updating role:", error); alert("Failed to update role."); }
-        }
+        async function toggleApproval(userId, newStatus) { const button = event.target; button.disabled = true; try { await db.collection('users').doc(userId).update({ approved: newStatus }); loadUsers(); } catch (error) { console.error("Error updating approval:", error); alert("Failed to update approval status."); button.disabled = false; } }
+        async function updateRole(userId, newRole) { try { await db.collection('users').doc(userId).update({ role: newRole }); alert('Role updated successfully!'); } catch (error) { console.error("Error updating role:", error); alert("Failed to update role."); } }
     </script>
 </body>
 </html>
