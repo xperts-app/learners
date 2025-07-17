@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logging Out</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .message { font-size: 1.5rem; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="message">Logging you out...</div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+            authDomain: "xperts-auth.firebaseapp.com",
+            projectId: "xperts-auth",
+            storageBucket: "xperts-auth.appspot.com",
+            messagingSenderId: "143568403446",
+            appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+            measurementId: "G-082839CKEM"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Sign out the user as soon as the page loads
+        firebase.auth().signOut()
+            .then(() => {
+                // Sign-out successful.
+                console.log("User logged out successfully.");
+                window.location.href = 'index.html'; // Redirect to the login/home page
+            })
+            .catch((error) => {
+                // An error happened.
+                console.error("Logout Error:", error);
+                // Still redirect, as the session might be invalid anyway.
+                window.location.href = 'index.html';
+            });
+    </script>
+</body>
+</html>
