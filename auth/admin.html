@@ -9,12 +9,19 @@
         .container { max-width: 1200px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .security-warning { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        
+        .controls-bar { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 15px; background-color: #f8f9fa; border-radius: 6px; margin-bottom: 20px; }
+        .controls-bar input, .controls-bar select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem; }
+        .controls-bar input[type="search"] { flex-grow: 1; min-width: 200px; }
+
         #user-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         #user-table th, #user-table td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
         #user-table th { background-color: #f2f2f2; }
-        .action-btn { background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-weight: 500;}
+        
+        .action-btn { background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin: 2px; font-weight: 500; }
         .action-btn.approve { background-color: #28a745; }
-        .action-btn:disabled { background-color: #ccc; cursor: not-allowed;}
+        .action-btn.delete { background-color: #dc3545; }
+        .action-btn:disabled { background-color: #ccc; cursor: not-allowed; }
         .role-select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
     </style>
 </head>
@@ -22,8 +29,32 @@
     <div class="container">
         <h1>User Management</h1>
         <div class="security-warning">
-            <strong>🔴 SECURITY WARNING:</strong> This admin panel is publicly accessible. Anyone can view and manage user data. Do not use in production without authentication.
+            <strong>🔴 SECURITY WARNING:</strong> This admin panel is publicly accessible. For a real app, secure this page with an admin login.
         </div>
+
+        <div class="controls-bar">
+            <input type="search" id="search-input" placeholder="Search by Name, Email, or Mobile...">
+            <select id="status-filter">
+                <option value="all">All Statuses</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+            </select>
+            <select id="goal-filter">
+                <option value="all">All Goals</option>
+                <option value="NEET">NEET</option>
+                <option value="JEE">JEE</option>
+                <option value="Class 6-10">Class 6-10</option>
+            </select>
+            <select id="class-filter">
+                <option value="all">All Classes</option>
+                <option value="6th">6th</option>
+                <option value="7th">7th</option>
+                <option value="8th">8th</option>
+                <option value="9th">9th</option>
+                <option value="10th">10th</option>
+            </select>
+        </div>
+
         <table id="user-table">
             <thead>
                 <tr>
@@ -50,28 +81,149 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // UI Elements
         const userListBody = document.getElementById('user-list');
-        window.onload = loadUsers;
+        const searchInput = document.getElementById('search-input');
+        const statusFilter = document.getElementById('status-filter');
+        const goalFilter = document.getElementById('goal-filter');
+        const classFilter = document.getElementById('class-filter');
 
-        async function loadUsers() {
+        let allUsers = []; // Store all users to avoid frequent DB calls
+
+        // Initial Load
+        window.onload = loadAndRenderUsers;
+
+        // Add event listeners for filters
+        searchInput.addEventListener('input', applyFiltersAndRender);
+        statusFilter.addEventListener('change', applyFiltersAndRender);
+        goalFilter.addEventListener('change', applyFiltersAndRender);
+        classFilter.addEventListener('change', applyFiltersAndRender);
+
+        // --- Functions ---
+
+        async function loadAndRenderUsers() {
             userListBody.innerHTML = '<tr><td colspan="6">Loading users...</td></tr>';
             try {
                 const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
-                userListBody.innerHTML = '';
-                if (snapshot.empty) { userListBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>'; return; }
-                snapshot.forEach(doc => {
-                    const userData = doc.data();
-                    const tr = document.createElement('tr');
-                    tr.setAttribute('data-id', doc.id);
-                    const approvalStatus = userData.approved ? `<span style="color: green;">Approved</span>` : `<span style="color: orange;">Pending</span>`;
-                    const approveButton = userData.approved ? '' : `<button class="action-btn approve" onclick="toggleApproval('${doc.id}', true)">Approve</button>`;
-                    tr.innerHTML = `<td>${userData.fullName}</td><td>${userData.email}<br><small>${userData.mobile}</small></td><td>${userData.goal || 'N/A'}${userData.class ? ' - ' + userData.class : ''}</td><td>${approvalStatus}</td><td><select class="role-select" onchange="updateRole('${doc.id}', this.value)"><option value="student" ${userData.role === 'student' ? 'selected' : ''}>Student</option><option value="teacher" ${userData.role === 'teacher' ? 'selected' : ''}>Teacher</option><option value="admin" ${userData.role === 'admin' ? 'selected' : ''}>Admin</option></select></td><td>${approveButton}</td>`;
-                    userListBody.appendChild(tr);
-                });
-            } catch (error) { console.error("Error loading users: ", error); userListBody.innerHTML = '<tr><td colspan="6" style="color: red;">Error: Could not load users. Check Firebase config and console.</td></tr>'; }
+                allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                applyFiltersAndRender();
+            } catch (error) {
+                console.error("Error loading users: ", error);
+                userListBody.innerHTML = '<tr><td colspan="6" style="color: red;">Error: Could not load users. Check Firebase config and console.</td></tr>';
+            }
         }
-        async function toggleApproval(userId, newStatus) { const button = event.target; button.disabled = true; try { await db.collection('users').doc(userId).update({ approved: newStatus }); loadUsers(); } catch (error) { console.error("Error updating approval:", error); alert("Failed to update approval status."); button.disabled = false; } }
-        async function updateRole(userId, newRole) { try { await db.collection('users').doc(userId).update({ role: newRole }); alert('Role updated successfully!'); } catch (error) { console.error("Error updating role:", error); alert("Failed to update role."); } }
+
+        function applyFiltersAndRender() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const status = statusFilter.value;
+            const goal = goalFilter.value;
+            const userClass = classFilter.value;
+
+            let filteredUsers = allUsers.filter(user => {
+                // Search filter
+                const matchesSearch = searchTerm === '' ||
+                    user.fullName.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm) ||
+                    user.mobile.includes(searchTerm);
+
+                // Status filter
+                const matchesStatus = status === 'all' ||
+                    (status === 'approved' && user.approved) ||
+                    (status === 'pending' && !user.approved);
+
+                // Goal filter
+                const matchesGoal = goal === 'all' || user.goal === goal;
+
+                // Class filter
+                const matchesClass = userClass === 'all' || user.class === userClass;
+
+                return matchesSearch && matchesStatus && matchesGoal && matchesClass;
+            });
+            
+            renderTable(filteredUsers);
+        }
+
+        function renderTable(users) {
+            userListBody.innerHTML = '';
+            if (users.length === 0) {
+                userListBody.innerHTML = '<tr><td colspan="6">No users match the current filters.</td></tr>';
+                return;
+            }
+
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', user.id);
+                const approvalStatus = user.approved ? `<span style="color: green;">Approved</span>` : `<span style="color: orange;">Pending</span>`;
+                
+                const actionButtons = `
+                    ${!user.approved ? `<button class="action-btn approve" onclick="toggleApproval('${user.id}', true)">Approve</button>` : ''}
+                    <button class="action-btn delete" onclick="deleteUser('${user.id}', '${user.fullName}')">Delete</button>
+                `;
+
+                tr.innerHTML = `
+                    <td>${user.fullName}</td>
+                    <td>${user.email}<br><small>${user.mobile}</small></td>
+                    <td>${user.goal || 'N/A'}${user.class ? ' - ' + user.class : ''}</td>
+                    <td>${approvalStatus}</td>
+                    <td>
+                        <select class="role-select" onchange="updateRole('${user.id}', this.value)">
+                            <option value="student" ${user.role === 'student' ? 'selected' : ''}>Student</option>
+                            <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </td>
+                    <td>${actionButtons}</td>
+                `;
+                userListBody.appendChild(tr);
+            });
+        }
+        
+        async function toggleApproval(userId, newStatus) {
+            const button = event.target; button.disabled = true;
+            try {
+                await db.collection('users').doc(userId).update({ approved: newStatus });
+                // Update local data and re-render to avoid DB call
+                const userIndex = allUsers.findIndex(u => u.id === userId);
+                if (userIndex > -1) allUsers[userIndex].approved = newStatus;
+                applyFiltersAndRender();
+            } catch (error) {
+                console.error("Error updating approval:", error);
+                alert("Failed to update approval status.");
+                button.disabled = false;
+            }
+        }
+        
+        async function updateRole(userId, newRole) {
+            try {
+                await db.collection('users').doc(userId).update({ role: newRole });
+                // Update local data
+                const userIndex = allUsers.findIndex(u => u.id === userId);
+                if (userIndex > -1) allUsers[userIndex].role = newRole;
+                alert('Role updated successfully!');
+            } catch (error) {
+                console.error("Error updating role:", error);
+                alert("Failed to update role.");
+            }
+        }
+
+        async function deleteUser(userId, userName) {
+            const confirmation = confirm(`Are you sure you want to delete the user "${userName}"? This will only remove their data from this database.\n\nIMPORTANT: You must still manually delete them from the Firebase "Authentication" tab to fully remove their account.`);
+            if (!confirmation) return;
+
+            try {
+                // Delete user from Firestore
+                await db.collection('users').doc(userId).delete();
+                
+                // Remove from local array and re-render
+                allUsers = allUsers.filter(u => u.id !== userId);
+                applyFiltersAndRender();
+
+                alert(`User "${userName}" data has been deleted from the database.`);
+            } catch (error) {
+                console.error("Error deleting user data:", error);
+                alert("Failed to delete user data. See console for details.");
+            }
+        }
     </script>
 </body>
 </html>
