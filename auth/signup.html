@@ -34,37 +34,67 @@
         <div class="progress-bar"><div id="progress-bar-inner" class="progress-bar-inner"></div></div>
 
         <!-- Step 1: Name -->
-        <div id="step-1" class="step active">
+        <div id="step-name" class="step active">
             <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="bulbGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:1" /><stop offset="100%" style="stop-color:rgb(255,165,0);stop-opacity:1" /></radialGradient></defs><path d="M 60 75 L 40 75 L 40 70 L 60 70 Z" fill="#3f51b5"/><path d="M 65 80 L 35 80 L 35 75 L 65 75 Z" fill="#303f9f"/><circle cx="50" cy="45" r="30" fill="url(#bulbGradient)" stroke="#FFA500" stroke-width="2"/><path d="M 50 75 C 45 65, 40 60, 40 50 A 10 10 0 1 1 60 50 C 60 60, 55 65, 50 75 Z" fill="#FFA500"/></svg></div>
             <h2>We are excited to have you join the ALLEN family!</h2><p>What should we call you?</p>
-            <input type="text" id="fullName" class="input-field" placeholder="Student's full name"><button class="btn" onclick="nextStep(2)">Next</button>
+            <input type="text" id="fullName" class="input-field" placeholder="Student's full name"><button class="btn" onclick="nextStep('step-goal')">Next</button>
         </div>
 
-        <!-- Dynamic Steps -->
-        <div id="step-2" class="step"></div>
-        <div id="step-3" class="step"></div>
-        <div id="step-4" class="step"></div>
+        <!-- Step 2: Goal -->
+        <div id="step-goal" class="step">
+            <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>
+            <h2 id="greeting">Hi, [Name]!</h2><p>Please tell us your goal?</p>
+            <div class="choice-grid single-col">
+                <button class="choice-btn" onclick="selectGoal('NEET')">NEET</button>
+                <button class="choice-btn" onclick="selectGoal('JEE')">JEE</button>
+                <button class="choice-btn" onclick="selectGoal('Class 6-10')">Class 6-10</button>
+            </div>
+        </div>
+
+        <!-- Step 3A: Class for NEET/JEE (NEW) -->
+        <div id="step-class-neet-jee" class="step">
+            <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>
+            <h2>Which class are you preparing for?</h2>
+            <div class="choice-grid">
+                <button class="choice-btn" onclick="selectHighSchoolClass('Class 11')">Class 11</button>
+                <button class="choice-btn" onclick="selectHighSchoolClass('Class 12')">Class 12</button>
+            </div>
+        </div>
+
+        <!-- Step 3B: Class for 6-10 -->
+        <div id="step-class-junior" class="step">
+            <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>
+            <h2>You selected, Class 6-10!</h2><p>Which class are you in?</p>
+            <div class="choice-grid"><button class="choice-btn" onclick="selectJuniorClass('6th')">6th</button><button class="choice-btn" onclick="selectJuniorClass('7th')">7th</button><button class="choice-btn" onclick="selectJuniorClass('8th')">8th</button><button class="choice-btn" onclick="selectJuniorClass('9th')">9th</button><button class="choice-btn" onclick="selectJuniorClass('10th')">10th</button></div>
+        </div>
+
+        <!-- Step 4: Board (Only for 6-10 Path) -->
+        <div id="step-board" class="step">
+            <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>
+            <h2>Great!</h2><p>Which board are you studying under?</p>
+            <div class="choice-grid"><button class="choice-btn" onclick="selectBoard('CBSE')">CBSE</button><button class="choice-btn" onclick="selectBoard('ICSE')">ICSE</button><button class="choice-btn" onclick="selectBoard('State Board')">State Board</button><button class="choice-btn" onclick="selectBoard('Others')">Others</button></div>
+        </div>
         
         <!-- Step 5: Additional Info -->
-        <div id="step-5" class="step">
-             <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>
+        <div id="step-info" class="step">
+            <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 30 20 A 10 10 0 0 1 40 10 H 60 A 10 10 0 0 1 70 20 V 30 H 30 Z" fill="#1e88e5"/><path d="M 25 30 H 75 V 85 A 10 10 0 0 1 65 95 H 35 A 10 10 0 0 1 25 85 Z" fill="#388e3c"/><path d="M 20 40 L 25 40 V 60 L 20 60 Z" fill="#1565c0"/><path d="M 80 40 L 75 40 V 60 L 80 60 Z" fill="#1565c0"/></svg></div>
             <h2>Just a few more details...</h2>
             <div class="form-group"><label for="email">Your Email ID</label><input type="email" id="email" class="input-field" placeholder="student@example.com"></div>
             <div class="form-group"><label for="mobile">Your Mobile Number</label><input type="tel" id="mobile" class="input-field" placeholder="10-digit mobile number"></div>
             <div class="form-group"><label for="gender">Gender</label><select id="gender" class="input-field"><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Prefer not to say</option></select></div>
             <div class="form-group"><label for="parentName">Parent's Name</label><input type="text" id="parentName" class="input-field" placeholder="Parent's full name"></div>
             <div class="form-group"><label for="parentMobile">Parent's Mobile Number</label><input type="tel" id="parentMobile" class="input-field" placeholder="Parent's mobile number"></div>
-            <button class="btn" onclick="nextStep(6)">Continue</button>
+            <button class="btn" onclick="nextStep('step-password')">Continue</button>
         </div>
 
         <!-- Step 6: Password -->
-        <div id="step-6" class="step">
+        <div id="step-password" class="step">
             <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>
             <h2>Almost done!</h2><p>Create a secure password.</p><input type="password" id="password" class="input-field" placeholder="Create Password (min. 6 characters)"><button class="btn" onclick="submitForm()">Create Account</button>
         </div>
         
         <!-- Step 7: Final -->
-        <div id="step-7" class="step">
+        <div id="step-final" class="step">
             <div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 30 20 A 10 10 0 0 1 40 10 H 60 A 10 10 0 0 1 70 20 V 30 H 30 Z" fill="#1e88e5"/><path d="M 25 30 H 75 V 85 A 10 10 0 0 1 65 95 H 35 A 10 10 0 0 1 25 85 Z" fill="#388e3c"/><path d="M 20 40 L 25 40 V 60 L 20 60 Z" fill="#1565c0"/><path d="M 80 40 L 75 40 V 60 L 80 60 Z" fill="#1565c0"/></svg></div>
             <h2>Thank you for sharing your details!</h2><p>Let's setup your ALLEN experience</p><button class="btn-primary" onclick="goToLogin()">Lets Go!</button>
         </div>
@@ -76,7 +106,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script>
-        // Your Firebase Config is now included below
         const firebaseConfig = {
             apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
             authDomain: "xperts-auth.firebaseapp.com",
@@ -90,18 +119,61 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        let currentStep = 1, totalSteps = 7;
         const formData = {}, errorMessage = document.getElementById('error-message');
-        const trophyIconHTML = `<div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>`;
-        function buildSteps() { document.getElementById('step-2').innerHTML = `${trophyIconHTML}<h2 id="greeting">Hi, [Name]!</h2><p>Please tell us your goal?</p><div class="choice-grid single-col"><button class="choice-btn" onclick="selectGoal('NEET')">NEET</button><button class="choice-btn" onclick="selectGoal('JEE')">JEE</button><button class="choice-btn" onclick="selectGoal('Class 6-10')">Class 6-10</button></div>`; document.getElementById('step-3').innerHTML = `${trophyIconHTML}<h2>You selected, Class 6-10!</h2><p>Which class are you in?</p><div class="choice-grid"><button class="choice-btn" onclick="selectClass('6th')">6th</button><button class="choice-btn" onclick="selectClass('7th')">7th</button><button class="choice-btn" onclick="selectClass('8th')">8th</button><button class="choice-btn" onclick="selectClass('9th')">9th</button><button class="choice-btn" onclick="selectClass('10th')">10th</button></div>`; document.getElementById('step-4').innerHTML = `${trophyIconHTML}<h2>Great!</h2><p>Which board are you studying under?</p><div class="choice-grid"><button class="choice-btn" onclick="selectBoard('CBSE')">CBSE</button><button class="choice-btn" onclick="selectBoard('ICSE')">ICSE</button><button class="choice-btn" onclick="selectBoard('State Board')">State Board</button><button class="choice-btn" onclick="selectBoard('Others')">Others</button></div>`; }
-        function updateProgressBar() { const progress = ((currentStep - 1) / (totalSteps - 1)) * 100; document.getElementById('progress-bar-inner').style.width = `${progress}%`; }
-        function nextStep(step) { errorMessage.textContent = ''; if (currentStep === 1) { const name = document.getElementById('fullName').value.trim(); if (!name) { errorMessage.textContent = "Please enter your name."; return; } formData.fullName = name; document.getElementById('greeting').textContent = `Hi, ${name}!`; } if (currentStep === 5) { formData.email = document.getElementById('email').value.trim(); formData.mobile = document.getElementById('mobile').value.trim(); formData.gender = document.getElementById('gender').value; formData.parentName = document.getElementById('parentName').value.trim(); formData.parentMobile = document.getElementById('parentMobile').value.trim(); if (!formData.email || !formData.mobile || !formData.gender || !formData.parentName) { errorMessage.textContent = "Please fill all required fields."; return; } } document.querySelectorAll('.step.active').forEach(s => s.classList.remove('active')); currentStep = step; document.getElementById(`step-${currentStep}`).classList.add('active'); updateProgressBar(); }
-        function selectGoal(goal) { formData.goal = goal; if (goal === 'Class 6-10') { nextStep(3); } else { nextStep(5); } }
-        function selectClass(className) { formData.class = className; nextStep(4); }
-        function selectBoard(board) { formData.board = board; nextStep(5); }
-        async function submitForm() { errorMessage.textContent = ''; formData.password = document.getElementById('password').value; if (formData.password.length < 6) { errorMessage.textContent = 'Password must be at least 6 characters.'; return; } const btn = event.target; btn.disabled = true; btn.textContent = 'Creating...'; try { const emailCheck = await db.collection('users').where('email', '==', formData.email).get(); if (!emailCheck.empty) throw new Error('This email address is already registered.'); const mobileCheck = await db.collection('users').where('mobile', '==', formData.mobile).get(); if (!mobileCheck.empty) throw new Error('This mobile number is already registered.'); const userCredential = await auth.createUserWithEmailAndPassword(formData.email, formData.password); const user = userCredential.user; await db.collection('users').doc(user.uid).set({ fullName: formData.fullName, email: formData.email, mobile: formData.mobile, goal: formData.goal, class: formData.class || null, board: formData.board || null, gender: formData.gender, parentName: formData.parentName, parentMobile: formData.parentMobile, role: 'student', approved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); nextStep(7); } catch (error) { console.error("Signup Error:", error); errorMessage.textContent = error.message.replace('Firebase: ', '') || 'Failed to create account.'; btn.disabled = false; btn.textContent = 'Create Account'; } }
+        const progressBar = document.getElementById('progress-bar-inner');
+
+        const stepProgress = {
+            'step-name': 0, 'step-goal': 14, 'step-class-neet-jee': 28, 'step-class-junior': 28,
+            'step-board': 42, 'step-info': 56, 'step-password': 80, 'step-final': 100
+        };
+        
+        function updateProgressBar(stepId) { progressBar.style.width = `${stepProgress[stepId] || 0}%`; }
+        function nextStep(stepId) {
+            errorMessage.textContent = '';
+            const currentStep = document.querySelector('.step.active');
+            if (currentStep.id === 'step-name') {
+                const name = document.getElementById('fullName').value.trim();
+                if (!name) { errorMessage.textContent = "Please enter your name."; return; }
+                formData.fullName = name; document.getElementById('greeting').textContent = `Hi, ${name}!`;
+            }
+            if (currentStep.id === 'step-info') {
+                formData.email = document.getElementById('email').value.trim();
+                formData.mobile = document.getElementById('mobile').value.trim();
+                formData.gender = document.getElementById('gender').value;
+                formData.parentName = document.getElementById('parentName').value.trim();
+                formData.parentMobile = document.getElementById('parentMobile').value.trim();
+                if (!formData.email || !formData.mobile || !formData.gender || !formData.parentName) { errorMessage.textContent = "Please fill all required fields."; return; }
+            }
+            currentStep.classList.remove('active');
+            document.getElementById(stepId).classList.add('active');
+            updateProgressBar(stepId);
+        }
+
+        function selectGoal(goal) {
+            formData.goal = goal;
+            if (goal === 'NEET' || goal === 'JEE') {
+                nextStep('step-class-neet-jee');
+            } else if (goal === 'Class 6-10') {
+                nextStep('step-class-junior');
+            }
+        }
+        function selectHighSchoolClass(className) {
+            formData.class = className;
+            nextStep('step-info'); // Skip board selection
+        }
+        function selectJuniorClass(className) {
+            formData.class = className;
+            nextStep('step-board'); // Go to board selection
+        }
+        function selectBoard(board) {
+            formData.board = board;
+            nextStep('step-info');
+        }
+        
+        async function submitForm() { errorMessage.textContent = ''; formData.password = document.getElementById('password').value; if (formData.password.length < 6) { errorMessage.textContent = 'Password must be at least 6 characters.'; return; } const btn = event.target; btn.disabled = true; btn.textContent = 'Creating...'; try { const emailCheck = await db.collection('users').where('email', '==', formData.email).get(); if (!emailCheck.empty) throw new Error('This email address is already registered.'); const mobileCheck = await db.collection('users').where('mobile', '==', formData.mobile).get(); if (!mobileCheck.empty) throw new Error('This mobile number is already registered.'); const userCredential = await auth.createUserWithEmailAndPassword(formData.email, formData.password); const user = userCredential.user; await db.collection('users').doc(user.uid).set({ fullName: formData.fullName, email: formData.email, mobile: formData.mobile, goal: formData.goal, class: formData.class || null, board: formData.board || null, gender: formData.gender, parentName: formData.parentName, parentMobile: formData.parentMobile, role: 'student', approved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); nextStep('step-final'); } catch (error) { console.error("Signup Error:", error); errorMessage.textContent = error.message.replace('Firebase: ', '') || 'Failed to create account.'; btn.disabled = false; btn.textContent = 'Create Account'; } }
         function goToLogin() { window.location.href = 'index.html'; }
-        buildSteps(); updateProgressBar();
+        
+        updateProgressBar('step-name'); // Initial call
     </script>
 </body>
 </html>
