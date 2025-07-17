@@ -4,186 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ALLEN</title>
-    <!-- CSS is the same as your first request, so I'm omitting it for brevity. 
-         Just copy the CSS from the first response into this <style> tag. -->
+    <!-- Use the same CSS from the first response. It's unchanged. -->
     <style>
-        :root { --primary-color: #007BFF; --light-gray: #f0f2f5; --text-color: #333; --border-color: #ccc; --button-bg: #e4e6eb; --button-text: #4b4f56; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: var(--light-gray); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-color); }
-        .container { background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; margin: 1rem; }
-        .header { display: flex; align-items: center; margin-bottom: 1.5rem; }
-        .back-arrow { font-size: 1.5rem; color: var(--text-color); text-decoration: none; margin-right: 1rem; }
-        .logo { font-size: 1.8rem; font-weight: 900; color: var(--text-color); letter-spacing: 1px; }
-        h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
-        .form-group { margin-bottom: 1rem; position: relative; }
-        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
-        .form-group input:disabled { background-color: #f5f5f5; cursor: not-allowed; }
-        .form-group input:focus { border-color: var(--primary-color); }
-        #togglePassword { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #888; }
-        .forgot-password { display: block; text-align: right; margin-top: 0.5rem; margin-bottom: 1.5rem; color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 0.9rem; }
-        .login-btn { width: 100%; padding: 14px; background-color: var(--button-bg); color: var(--button-text); border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
-        .login-btn:hover { background-color: #d8dbe0; }
-        .footer-text { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #666; }
-        .footer-text a { color: var(--primary-color); font-weight: 500; text-decoration: none; }
-        #password-container { display: none; }
-        #error-message { color: #d93025; margin-top: 10px; font-size: 0.9rem; text-align: center; min-height: 20px;}
+        :root { --primary-color: #007BFF; --light-gray: #f0f2f5; --text-color: #333; --border-color: #ccc; --button-bg: #e4e6eb; --button-text: #4b4f56; } * { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: var(--light-gray); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--text-color); } .container { background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; margin: 1rem; } .header { display: flex; align-items: center; margin-bottom: 1.5rem; } .back-arrow { font-size: 1.5rem; color: var(--text-color); text-decoration: none; margin-right: 1rem; } .logo { font-size: 1.8rem; font-weight: 900; color: var(--text-color); letter-spacing: 1px; } h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; } .form-group { margin-bottom: 1rem; position: relative; } .form-group input { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.2s; } .form-group input:disabled { background-color: #f5f5f5; cursor: not-allowed; } .form-group input:focus { border-color: var(--primary-color); } #togglePassword { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #888; } .forgot-password { display: block; text-align: right; margin-top: 0.5rem; margin-bottom: 1.5rem; color: var(--primary-color); text-decoration: none; font-weight: 500; font-size: 0.9rem; } .login-btn { width: 100%; padding: 14px; background-color: var(--button-bg); color: var(--button-text); border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; } .login-btn:hover { background-color: #d8dbe0; } .footer-text { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #666; } .footer-text a { color: var(--primary-color); font-weight: 500; text-decoration: none; } #password-container { display: none; } #error-message { color: #d93025; margin-top: 10px; font-size: 0.9rem; text-align: center; min-height: 20px;}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <a href="#" class="back-arrow">←</a>
-            <div class="logo">ALLEN</div>
-        </div>
+        <div class="header"><a href="#" class="back-arrow">←</a><div class="logo">ALLEN</div></div>
         <h2 id="page-title">Login with Mobile No.</h2>
         <form id="login-form" novalidate>
-            <div class="form-group">
-                <input type="tel" id="mobile" placeholder="Mobile Number" required>
-            </div>
+            <div class="form-group"><input type="tel" id="mobile" placeholder="Mobile Number" required></div>
             <div id="password-container" class="form-group">
                 <input type="password" id="password" placeholder="Password" required>
-                <span id="togglePassword">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16"><path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 0-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/><path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/></svg>
-                </span>
+                <span id="togglePassword"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16"><path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 0-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/><path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/></svg></span>
             </div>
             <a href="#" class="forgot-password">Forgot password?</a>
             <button type="submit" id="action-btn" class="login-btn">Continue</button>
             <p id="error-message"></p>
         </form>
-        <div class="footer-text">
-            Having trouble? Write us at <a href="mailto:wecare@allen.in">wecare@allen.in</a>
-        </div>
+        <div class="footer-text">Having trouble? Write us at <a href="mailto:wecare@allen.in">wecare@allen.in</a></div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script>
-        // FIREBASE CONFIG
+        // ❗️❗️❗️ PASTE YOUR REAL FIREBASE CONFIG HERE ❗️❗️❗️
         const firebaseConfig = {
-          apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
-          authDomain: "xperts-auth.firebaseapp.com",
-          projectId: "xperts-auth",
-          storageBucket: "xperts-auth.appspot.com",
-          messagingSenderId: "143568403446",
-          appId: "1:143568403446:web:669a8964aa88aab9b065d7",
-          measurementId: "G-082839CKEM"
+          apiKey: "AIzaSy_YOUR_REAL_API_KEY",
+          authDomain: "your-project-id.firebaseapp.com",
+          /* ... and so on */
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- SCRIPT FROM FIRST RESPONSE, WITH MODIFIED handlePasswordStep ---
-        const loginForm = document.getElementById('login-form');
-        const mobileInput = document.getElementById('mobile');
-        const passwordContainer = document.getElementById('password-container');
-        const passwordInput = document.getElementById('password');
-        const actionBtn = document.getElementById('action-btn');
-        const togglePassword = document.getElementById('togglePassword');
-        const errorMessage = document.getElementById('error-message');
-
-        let isPasswordStep = false;
-        let userEmail = null;
-
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            errorMessage.textContent = '';
-            if (!isPasswordStep) handleMobileStep();
-            else handlePasswordStep();
-        });
-
-        togglePassword.addEventListener('click', () => {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-        });
-
-        async function handleMobileStep() {
-            const mobileNumber = mobileInput.value.trim();
-            if (mobileNumber.length < 10) {
-                 errorMessage.textContent = 'Please enter a valid mobile number.';
-                 return;
-            }
-            actionBtn.disabled = true;
-            actionBtn.textContent = 'Checking...';
-            try {
-                const snapshot = await db.collection('users').where('mobile', '==', mobileNumber).get();
-                if (snapshot.empty) {
-                    alert('This mobile number is not registered. Redirecting to sign up.');
-                    window.location.href = 'signup.html';
-                } else {
-                    const userData = snapshot.docs[0].data();
-                    userEmail = userData.email;
-                    isPasswordStep = true;
-                    mobileInput.disabled = true;
-                    passwordContainer.style.display = 'block';
-                    actionBtn.textContent = 'Login';
-                    passwordInput.focus();
-                }
-            } catch (error) {
-                console.error("Error checking mobile number: ", error);
-                errorMessage.textContent = 'An error occurred. Please try again.';
-            } finally {
-                actionBtn.disabled = false;
-            }
-        }
-
-        async function handlePasswordStep() {
-            const password = passwordInput.value;
-            if (!password || !userEmail) {
-                errorMessage.textContent = 'An error occurred. Please restart the login process.';
-                return;
-            }
-
-            actionBtn.disabled = true;
-            actionBtn.textContent = 'Logging in...';
-
-            try {
-                // Step 1: Sign in with Auth
-                const userCredential = await auth.signInWithEmailAndPassword(userEmail, password);
-                const user = userCredential.user;
-
-                // Step 2: Fetch user data from Firestore
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (!userDoc.exists) {
-                    throw new Error("User data not found.");
-                }
-                const userData = userDoc.data();
-
-                // Step 3: Check for Admin Approval
-                if (!userData.approved) {
-                    errorMessage.textContent = 'Your account is pending admin approval. Please wait.';
-                    await auth.signOut(); // Sign out the user
-                    return;
-                }
-
-                // Step 4: Role-based redirection
-                alert('Login Successful! Redirecting...');
-                switch (userData.role) {
-                    case 'admin':
-                        window.location.href = 'admin.html'; // Redirect admin to panel
-                        break;
-                    case 'teacher':
-                        window.location.href = 'https://askfilo.com';
-                        break;
-                    case 'student':
-                    default:
-                        window.location.href = 'https://www.allen.ac.in/';
-                        break;
-                }
-
-            } catch (error) {
-                console.error("Login Error: ", error);
-                if (error.code === 'auth/wrong-password') {
-                    errorMessage.textContent = 'Incorrect password. Please try again.';
-                } else {
-                    errorMessage.textContent = error.message || 'Login failed. Please try again.';
-                }
-            } finally {
-                actionBtn.disabled = false;
-                actionBtn.textContent = 'Login';
-            }
-        }
+        // The JavaScript logic from the previous response is unchanged.
+        const loginForm = document.getElementById('login-form'); const mobileInput = document.getElementById('mobile'); const passwordContainer = document.getElementById('password-container'); const passwordInput = document.getElementById('password'); const actionBtn = document.getElementById('action-btn'); const togglePassword = document.getElementById('togglePassword'); const errorMessage = document.getElementById('error-message'); let isPasswordStep = false; let userEmail = null;
+        loginForm.addEventListener('submit', (e) => { e.preventDefault(); errorMessage.textContent = ''; if (!isPasswordStep) handleMobileStep(); else handlePasswordStep(); });
+        togglePassword.addEventListener('click', () => { const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password'; passwordInput.setAttribute('type', type); });
+        async function handleMobileStep() { const mobileNumber = mobileInput.value.trim(); if (mobileNumber.length < 10) { errorMessage.textContent = 'Please enter a valid mobile number.'; return; } actionBtn.disabled = true; actionBtn.textContent = 'Checking...'; try { const snapshot = await db.collection('users').where('mobile', '==', mobileNumber).get(); if (snapshot.empty) { alert('This mobile number is not registered. Redirecting to sign up.'); window.location.href = 'signup.html'; } else { const userData = snapshot.docs[0].data(); userEmail = userData.email; isPasswordStep = true; mobileInput.disabled = true; passwordContainer.style.display = 'block'; actionBtn.textContent = 'Login'; passwordInput.focus(); } } catch (error) { console.error("Error checking mobile number: ", error); errorMessage.textContent = 'An error occurred. Please try again.'; } finally { actionBtn.disabled = false; } }
+        async function handlePasswordStep() { const password = passwordInput.value; if (!password || !userEmail) { errorMessage.textContent = 'An error occurred. Please restart the login process.'; return; } actionBtn.disabled = true; actionBtn.textContent = 'Logging in...'; try { const userCredential = await auth.signInWithEmailAndPassword(userEmail, password); const user = userCredential.user; const userDoc = await db.collection('users').doc(user.uid).get(); if (!userDoc.exists) { throw new Error("User data not found."); } const userData = userDoc.data(); if (!userData.approved) { errorMessage.textContent = 'Your account is pending admin approval. Please wait.'; await auth.signOut(); return; } alert('Login Successful! Redirecting...'); switch (userData.role) { case 'admin': window.location.href = 'admin.html'; break; case 'teacher': window.location.href = 'https://askfilo.com'; break; case 'student': default: window.location.href = 'https://www.allen.ac.in/'; break; } } catch (error) { console.error("Login Error: ", error); if (error.code === 'auth/wrong-password') { errorMessage.textContent = 'Incorrect password. Please try again.'; } else { errorMessage.textContent = error.message || 'Login failed. Please try again.'; } } finally { actionBtn.disabled = false; actionBtn.textContent = 'Login'; } }
     </script>
 </body>
 </html>
