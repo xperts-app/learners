@@ -3,158 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join ALLEN</title>
+    <title>Login - ALLEN</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background-color: #fff; width: 100%; max-width: 420px; min-height: 600px; padding: 2rem 1.5rem; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; }
-        .progress-bar { width: 100%; height: 4px; background-color: #e0e0e0; border-radius: 2px; margin-bottom: 2rem; }
-        .progress-bar-inner { width: 0%; height: 100%; background-color: #007bff; border-radius: 2px; transition: width 0.4s ease; }
-        .step { display: none; flex-direction: column; align-items: center; text-align: center; flex-grow: 1; }
-        .step.active { display: flex; }
-        .step-image { margin: 2rem 0; display: flex; justify-content: center; align-items: center; }
-        .step-image svg { width: 140px; height: 140px; }
-        h2 { font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 0.5rem; }
-        p, label { font-size: 1rem; color: #666; margin-bottom: 1.5rem; }
-        .input-field, .btn-primary, .btn, .choice-btn { width: 100%; padding: 14px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 1rem; }
-        .btn, .choice-btn { background-color: #f0f2f5; color: #4b4f56; cursor: pointer; transition: all 0.2s; font-weight: 500; }
-        .btn:hover, .choice-btn:hover { background-color: #e2e6ea; border-color: #bbb; }
-        .btn-primary { background-color: #0056b3; color: white; border: none; font-weight: 600; }
-        .choice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 100%; }
-        .choice-grid.single-col { grid-template-columns: 1fr; }
-        .choice-grid .choice-btn { margin-bottom: 0; }
-        .form-group { width: 100%; margin-bottom: 1rem; text-align: left;}
-        .form-group label { margin-bottom: 0.5rem; display: block; font-weight: 500; }
-        #error-message { color: #d93025; margin-top: 15px; font-size: 0.9rem; height: 20px;}
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; margin:0; } .container { background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; margin: 1rem; } .header { display: flex; align-items: center; margin-bottom: 1.5rem; } .back-arrow { font-size: 1.5rem; color: #333; text-decoration: none; margin-right: 1rem; } .logo { font-size: 1.8rem; font-weight: 900; color: #333; letter-spacing: 1px; } h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; } .form-group { margin-bottom: 1rem; position: relative; } .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.2s; } .form-group input:disabled { background-color: #f5f5f5; cursor: not-allowed; } .form-group input:focus { border-color: #007bff; } #togglePassword { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #888; } .forgot-password { display: block; text-align: left; margin-bottom: 1.5rem; color: #007bff; text-decoration: none; font-weight: 500; font-size: 0.9rem; } .login-btn { width: 100%; padding: 14px; background-color: #e4e6eb; color: #4b4f56; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; } .login-btn:hover { background-color: #d8dbe0; } .footer-text { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #666; } .footer-text a { color: #007bff; font-weight: 500; text-decoration: none; } #password-container { display: none; } #error-message { color: #d93025; margin-top: 10px; font-size: 0.9rem; text-align: center; min-height: 20px;}
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="progress-bar"><div id="progress-bar-inner" class="progress-bar-inner"></div></div>
-
-        <!-- Step 1: Name -->
-        <div id="step-1" class="step active">
-            <div class="step-image">
-                <!-- Colorful Bulb SVG -->
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="bulbGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                            <stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:rgb(255,165,0);stop-opacity:1" />
-                        </radialGradient>
-                    </defs>
-                    <path d="M 60 75 L 40 75 L 40 70 L 60 70 Z" fill="#3f51b5"/>
-                    <path d="M 65 80 L 35 80 L 35 75 L 65 75 Z" fill="#303f9f"/>
-                    <circle cx="50" cy="45" r="30" fill="url(#bulbGradient)" stroke="#FFA500" stroke-width="2"/>
-                    <path d="M 50 75 C 45 65, 40 60, 40 50 A 10 10 0 1 1 60 50 C 60 60, 55 65, 50 75 Z" fill="#FFA500"/>
-                </svg>
+        <div class="header"><a href="#" class="back-arrow">←</a><div class="logo">ALLEN</div></div>
+        <h2 id="page-title">Login with Mobile No.</h2>
+        <form id="login-form" novalidate>
+            <div class="form-group"><input type="tel" id="mobile" placeholder="Mobile Number" required></div>
+            <div id="password-container" class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+                <span id="togglePassword"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 0-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z"/><path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z"/></svg></span>
             </div>
-            <h2>We are excited to have you join the ALLEN family!</h2>
-            <p>What should we call you?</p>
-            <input type="text" id="fullName" class="input-field" placeholder="Student's full name">
-            <button class="btn" onclick="nextStep(2)">Next</button>
-        </div>
-
-        <!-- Step 2-4 content will be built here -->
-        <div id="step-2" class="step"></div>
-        <div id="step-3" class="step"></div>
-        <div id="step-4" class="step"></div>
-        
-        <!-- Step 5: Additional Info -->
-        <div id="step-5" class="step">
-             <div class="step-image">
-                <!-- Colorful Trophy/Stand SVG -->
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/>
-                    <rect x="35" y="72" width="30" height="8" fill="#1565c0"/>
-                    <rect x="45" y="45" width="10" height="30" fill="#f57c00"/>
-                    <circle cx="50" cy="35" r="20" fill="#4caf50"/>
-                    <path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/>
-                    <circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/>
-                </svg>
-            </div>
-            <h2>Just a few more details...</h2>
-            <div class="form-group"><label for="email">Your Email ID</label><input type="email" id="email" class="input-field" placeholder="student@example.com"></div>
-            <div class="form-group"><label for="mobile">Your Mobile Number</label><input type="tel" id="mobile" class="input-field" placeholder="10-digit mobile number"></div>
-            <div class="form-group"><label for="gender">Gender</label><select id="gender" class="input-field"><option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Prefer not to say</option></select></div>
-            <div class="form-group"><label for="parentName">Parent's Name</label><input type="text" id="parentName" class="input-field" placeholder="Parent's full name"></div>
-            <div class="form-group"><label for="parentMobile">Parent's Mobile Number</label><input type="tel" id="parentMobile" class="input-field" placeholder="Parent's mobile number"></div>
-            <button class="btn" onclick="nextStep(6)">Continue</button>
-        </div>
-
-        <!-- Step 6: Password -->
-        <div id="step-6" class="step">
-            <div class="step-image">
-                <!-- Use Trophy SVG again -->
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg>
-            </div>
-            <h2>Almost done!</h2>
-            <p>Create a secure password.</p>
-            <input type="password" id="password" class="input-field" placeholder="Create Password (min. 6 characters)">
-            <button class="btn" onclick="submitForm()">Create Account</button>
-        </div>
-        
-        <!-- Step 7: Final -->
-        <div id="step-7" class="step">
-            <div class="step-image">
-                <!-- Colorful Backpack SVG -->
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M 30 20 A 10 10 0 0 1 40 10 H 60 A 10 10 0 0 1 70 20 V 30 H 30 Z" fill="#1e88e5"/>
-                    <path d="M 25 30 H 75 V 85 A 10 10 0 0 1 65 95 H 35 A 10 10 0 0 1 25 85 Z" fill="#388e3c"/>
-                    <path d="M 20 40 L 25 40 V 60 L 20 60 Z" fill="#1565c0"/>
-                    <path d="M 80 40 L 75 40 V 60 L 80 60 Z" fill="#1565c0"/>
-                </svg>
-            </div>
-            <h2>Thank you for sharing your details!</h2>
-            <p>Let's setup your ALLEN experience</p>
-            <button class="btn-primary" onclick="goToLogin()">Lets Go!</button>
-        </div>
-        
-        <p id="error-message"></p>
+            <a href="#" class="forgot-password">Forgot password?</a>
+            <button type="submit" id="action-btn" class="login-btn">Continue</button>
+            <p id="error-message"></p>
+        </form>
+        <div class="footer-text">New user? <a href="signup.html">Create an account</a></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script>
-        // ❗️❗️❗️ PASTE YOUR **REAL** FIREBASE CONFIG HERE TO FIX THE ERROR ❗️❗️❗️
+        // Your Firebase Config is now included below
         const firebaseConfig = {
-apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
-  authDomain: "xperts-auth.firebaseapp.com",
-  projectId: "xperts-auth",
-  storageBucket: "xperts-auth.firebasestorage.app",
-  messagingSenderId: "143568403446",
-  appId: "1:143568403446:web:669a8964aa88aab9b065d7",
-  measurementId: "G-082839CKEM"
+            apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+            authDomain: "xperts-auth.firebaseapp.com",
+            projectId: "xperts-auth",
+            storageBucket: "xperts-auth.appspot.com",
+            messagingSenderId: "143568403446",
+            appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+            measurementId: "G-082839CKEM"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        let currentStep = 1;
-        const totalSteps = 7;
-        const formData = {};
+        const loginForm = document.getElementById('login-form');
+        const mobileInput = document.getElementById('mobile');
+        const passwordContainer = document.getElementById('password-container');
+        const passwordInput = document.getElementById('password');
+        const actionBtn = document.getElementById('action-btn');
         const errorMessage = document.getElementById('error-message');
 
-        const trophyIconHTML = `<div class="step-image"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="80" width="50" height="8" fill="#1e88e5" rx="2"/><rect x="35" y="72" width="30" height="8" fill="#1565c0"/><rect x="45" y="45" width="10" height="30" fill="#f57c00"/><circle cx="50" cy="35" r="20" fill="#4caf50"/><path d="M 40 15 L 60 15 L 60 30 C 60 40 50 45 50 45 C 50 45 40 40 40 30 Z" fill="#1e88e5"/><circle cx="50" cy="35" r="10" fill="white" opacity="0.7"/></svg></div>`;
+        let isPasswordStep = false;
+        let userEmail = null;
 
-        function buildSteps() {
-            document.getElementById('step-2').innerHTML = `${trophyIconHTML}<h2 id="greeting">Hi, [Name]!</h2><p>Please tell us your goal?</p><div class="choice-grid single-col"><button class="choice-btn" onclick="selectGoal('NEET')">NEET</button><button class="choice-btn" onclick="selectGoal('JEE')">JEE</button><button class="choice-btn" onclick="selectGoal('Class 6-10')">Class 6-10</button></div>`;
-            document.getElementById('step-3').innerHTML = `${trophyIconHTML}<h2>You selected, Class 6-10!</h2><p>Which class are you in?</p><div class="choice-grid"><button class="choice-btn" onclick="selectClass('6th')">6th</button><button class="choice-btn" onclick="selectClass('7th')">7th</button><button class="choice-btn" onclick="selectClass('8th')">8th</button><button class="choice-btn" onclick="selectClass('9th')">9th</button><button class="choice-btn" onclick="selectClass('10th')">10th</button></div>`;
-            document.getElementById('step-4').innerHTML = `${trophyIconHTML}<h2>Great!</h2><p>Which board are you studying under?</p><div class="choice-grid"><button class="choice-btn" onclick="selectBoard('CBSE')">CBSE</button><button class="choice-btn" onclick="selectBoard('ICSE')">ICSE</button><button class="choice-btn" onclick="selectBoard('State Board')">State Board</button><button class="choice-btn" onclick="selectBoard('Others')">Others</button></div>`;
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            errorMessage.textContent = '';
+            if (!isPasswordStep) { handleMobileStep(); } 
+            else { handlePasswordStep(); }
+        });
+        
+        async function handleMobileStep() {
+            const mobileNumber = mobileInput.value.trim();
+            if (mobileNumber.length < 10) { errorMessage.textContent = 'Please enter a valid 10-digit mobile number.'; return; }
+            actionBtn.disabled = true;
+            actionBtn.textContent = 'Checking...';
+            try {
+                const snapshot = await db.collection('users').where('mobile', '==', mobileNumber).get();
+                if (snapshot.empty) {
+                    alert('This mobile number is not registered. Please create an account.');
+                    window.location.href = 'signup.html';
+                } else {
+                    const userData = snapshot.docs[0].data();
+                    userEmail = userData.email;
+                    isPasswordStep = true;
+                    mobileInput.disabled = true;
+                    passwordContainer.style.display = 'block';
+                    document.getElementById('page-title').textContent = 'Enter Password';
+                    actionBtn.textContent = 'Login';
+                    passwordInput.focus();
+                }
+            } catch (error) { console.error("Error checking mobile number: ", error); errorMessage.textContent = 'An error occurred. Please try again.';
+            } finally { actionBtn.disabled = false; }
         }
 
-        function updateProgressBar() { const progress = ((currentStep - 1) / (totalSteps - 1)) * 100; document.getElementById('progress-bar-inner').style.width = `${progress}%`; }
-        function nextStep(step) { errorMessage.textContent = ''; if (currentStep === 1) { const name = document.getElementById('fullName').value.trim(); if (!name) { errorMessage.textContent = "Please enter your name."; return; } formData.fullName = name; document.getElementById('greeting').textContent = `Hi, ${name}!`; } if (currentStep === 5) { formData.email = document.getElementById('email').value.trim(); formData.mobile = document.getElementById('mobile').value.trim(); formData.gender = document.getElementById('gender').value; formData.parentName = document.getElementById('parentName').value.trim(); formData.parentMobile = document.getElementById('parentMobile').value.trim(); if (!formData.email || !formData.mobile || !formData.gender || !formData.parentName) { errorMessage.textContent = "Please fill all required fields."; return; } } document.querySelectorAll('.step.active').forEach(s => s.classList.remove('active')); currentStep = step; document.getElementById(`step-${currentStep}`).classList.add('active'); updateProgressBar(); }
-        function selectGoal(goal) { formData.goal = goal; if (goal === 'Class 6-10') { nextStep(3); } else { nextStep(5); } }
-        function selectClass(className) { formData.class = className; nextStep(4); }
-        function selectBoard(board) { formData.board = board; nextStep(5); }
-        async function submitForm() { errorMessage.textContent = ''; formData.password = document.getElementById('password').value; if (formData.password.length < 6) { errorMessage.textContent = 'Password must be at least 6 characters.'; return; } const btn = event.target; btn.disabled = true; btn.textContent = 'Creating...'; try { const emailCheck = await db.collection('users').where('email', '==', formData.email).get(); if (!emailCheck.empty) throw new Error('This email address is already registered.'); const mobileCheck = await db.collection('users').where('mobile', '==', formData.mobile).get(); if (!mobileCheck.empty) throw new Error('This mobile number is already registered.'); const userCredential = await auth.createUserWithEmailAndPassword(formData.email, formData.password); const user = userCredential.user; await db.collection('users').doc(user.uid).set({ fullName: formData.fullName, email: formData.email, mobile: formData.mobile, goal: formData.goal, class: formData.class || null, board: formData.board || null, gender: formData.gender, parentName: formData.parentName, parentMobile: formData.parentMobile, role: 'student', approved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); nextStep(7); } catch (error) { console.error("Signup Error:", error); errorMessage.textContent = error.message.replace('Firebase: ', '') || 'Failed to create account.'; btn.disabled = false; btn.textContent = 'Create Account'; } }
-        function goToLogin() { window.location.href = 'index.html'; }
-        
-        // Initialize the page
-        buildSteps();
-        updateProgressBar();
+        async function handlePasswordStep() {
+            const password = passwordInput.value;
+            if (!password) { errorMessage.textContent = 'Please enter your password.'; return; }
+            if (!userEmail) { errorMessage.textContent = 'An error occurred. Please refresh and try again.'; return; }
+
+            actionBtn.disabled = true;
+            actionBtn.textContent = 'Logging in...';
+
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(userEmail, password);
+                const user = userCredential.user;
+                const userDoc = await db.collection('users').doc(user.uid).get();
+
+                if (!userDoc.exists) throw new Error("User data not found in database.");
+                const userData = userDoc.data();
+
+                if (!userData.approved) {
+                    errorMessage.textContent = 'Your account is pending admin approval. Please wait.';
+                    await auth.signOut();
+                } else {
+                    alert('Login Successful! Redirecting...');
+                    switch (userData.role) {
+                        case 'admin': window.location.href = 'admin.html'; break;
+                        case 'teacher': window.location.href = 'https://askfilo.com'; break;
+                        case 'student': default: window.location.href = 'https://www.allen.in/'; break;
+                    }
+                }
+            } catch (error) {
+                console.error("Login Error: ", error);
+                if (error.code === 'auth/wrong-password') { errorMessage.textContent = 'Incorrect password. Please try again.'; } 
+                else { errorMessage.textContent = error.message.replace('Firebase: ', '') || 'Login failed. Please try again.'; }
+            } finally {
+                actionBtn.disabled = false;
+                actionBtn.textContent = 'Login';
+            }
+        }
+
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        });
     </script>
 </body>
 </html>
