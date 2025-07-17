@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 600px; width: 100%; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
+        h1 { font-size: 1.8rem; color: #333; margin: 0; }
+        .profile-section { margin-bottom: 20px; }
+        .profile-item { display: flex; flex-wrap: wrap; align-items: center; margin-bottom: 15px; font-size: 1.1rem; }
+        .profile-item strong { color: #555; min-width: 120px; margin-right: 15px;}
+        .profile-item span, .profile-item input { color: #333; font-weight: 500; }
+        .profile-item input { font-size: 1rem; padding: 10px; border: 1px solid #ccc; border-radius: 6px; flex-grow: 1; transition: border-color 0.2s; }
+        .profile-item input:focus { border-color: #007bff; outline: none; }
+        .profile-item .readonly { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; }
+        #profile-edit { display: none; } /* This is the "masking" part */
+        .button-group { margin-top: 30px; text-align: right; }
+        .btn { text-decoration: none; font-size: 1rem; font-weight: 500; color: #fff; background-color: #007bff; padding: 10px 20px; border: none; border-radius: 6px; transition: background-color 0.2s; margin-left: 10px; cursor: pointer; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .btn:hover { background-color: #0056b3; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .feedback-note { font-size: 0.9rem; margin-top: 15px; font-weight: 500; }
+        .feedback-note.error { color: #d93025; }
+        .feedback-note.success { color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Profile</h1>
+            <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <!-- View Mode: Shown by default -->
+        <div id="profile-view">
+            <div class="profile-section">
+                <div class="profile-item"><strong>Name:</strong> <span id="display-name">Loading...</span></div>
+                <div class="profile-item"><strong>Email:</strong> <span id="display-email">Loading...</span></div>
+                <div class="profile-item"><strong>Mobile:</strong> <span id="display-mobile">Loading...</span></div>
+                <div class="profile-item"><strong>Goal:</strong> <span id="display-goal">Loading...</span></div>
+            </div>
+            <div class="button-group">
+                <button id="edit-btn" class="btn">Edit Profile</button>
+            </div>
+        </div>
+
+        <!-- Edit Mode: Hidden by default -->
+        <div id="profile-edit">
+            <div class="profile-section">
+                <div class="profile-item"><strong>Name:</strong> <input type="text" id="edit-name"></div>
+                <div class="profile-item"><strong>Email:</strong> <input type="email" id="edit-email"></div>
+                <div class="profile-item"><strong>Mobile:</strong> <input type="text" id="edit-mobile" class="readonly" readonly title="Mobile number cannot be changed."></div>
+                <p class="feedback-note" id="feedback-message"></p>
+            </div>
+            <div class="button-group">
+                <button id="cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button id="save-btn" class="btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+            authDomain: "xperts-auth.firebaseapp.com",
+            projectId: "xperts-auth",
+            storageBucket: "xperts-auth.appspot.com",
+            messagingSenderId: "143568403446",
+            appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+            measurementId: "G-082839CKEM"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const viewMode = document.getElementById('profile-view');
+        const editMode = document.getElementById('profile-edit');
+        const displayName = document.getElementById('display-name');
+        const displayEmail = document.getElementById('display-email');
+        const displayMobile = document.getElementById('display-mobile');
+        const displayGoal = document.getElementById('display-goal');
+        const editName = document.getElementById('edit-name');
+        const editEmail = document.getElementById('edit-email');
+        const editMobile = document.getElementById('edit-mobile');
+        const editBtn = document.getElementById('edit-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const feedbackMessage = document.getElementById('feedback-message');
+        
+        let currentUser;
+
+        // Auth Guard and Profile Loader
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                loadUserProfile(user.uid);
+            } else {
+                alert("You are not logged in. Redirecting to login page.");
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function loadUserProfile(uid) {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    // Populate view mode
+                    displayName.textContent = data.fullName;
+                    displayEmail.textContent = data.email;
+                    displayMobile.textContent = data.mobile;
+                    displayGoal.textContent = `${data.goal || 'N/A'} ${data.class ? `- ${data.class}` : ''}`;
+
+                    // Populate edit mode fields
+                    editName.value = data.fullName;
+                    editEmail.value = data.email;
+                    editMobile.value = data.mobile;
+                    
+                    // Update Auth display name for dashboard if it's out of sync
+                    if (currentUser.displayName !== data.fullName) {
+                        currentUser.updateProfile({ displayName: data.fullName });
+                    }
+                } else {
+                    console.error("No such user document!");
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        // Toggle between view and edit modes
+        editBtn.addEventListener('click', () => {
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+        });
+        cancelBtn.addEventListener('click', () => {
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+            feedbackMessage.textContent = ''; // Clear any messages
+            feedbackMessage.className = 'feedback-note';
+        });
+
+        // Save Changes
+        saveBtn.addEventListener('click', async () => {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            feedbackMessage.textContent = '';
+            
+            const newName = editName.value.trim();
+            const newEmail = editEmail.value.trim();
+            
+            if (!newName || !newEmail) {
+                showFeedback("Name and Email cannot be empty.", true);
+                resetSaveButton();
+                return;
+            }
+
+            try {
+                // Batch updates for better performance
+                const promises = [];
+                const firestoreRef = db.collection('users').doc(currentUser.uid);
+
+                // 1. Update Email in Firebase Auth (if changed)
+                if (newEmail !== currentUser.email) {
+                    promises.push(currentUser.updateEmail(newEmail));
+                }
+                // 2. Update Name in Firebase Auth (if changed)
+                if (newName !== currentUser.displayName) {
+                    promises.push(currentUser.updateProfile({ displayName: newName }));
+                }
+
+                // 3. Update Firestore Document
+                promises.push(firestoreRef.update({
+                    fullName: newName,
+                    email: newEmail
+                }));
+                
+                // Execute all updates
+                await Promise.all(promises);
+                
+                showFeedback('Profile updated successfully!', false);
+                await loadUserProfile(currentUser.uid); // Reload profile data
+                setTimeout(() => { cancelBtn.click(); }, 1500); // Switch back to view mode after a short delay
+
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                let message = 'An error occurred. Please try again.';
+                if (error.code === 'auth/requires-recent-login') {
+                    message = 'This action is sensitive. Please log out and log back in to change your email.';
+                } else if(error.code === 'auth/email-already-in-use') {
+                    message = 'This email address is already in use by another account.';
+                }
+                showFeedback(message, true);
+            } finally {
+                resetSaveButton();
+            }
+        });
+
+        function showFeedback(message, isError) {
+            feedbackMessage.textContent = message;
+            feedbackMessage.className = isError ? 'feedback-note error' : 'feedback-note success';
+        }
+        
+        function resetSaveButton() {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+        }
+    </script>
+</body>
+</html>
