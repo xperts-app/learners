@@ -5,70 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1200px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .security-warning { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        :root { --primary-blue: #007bff; --light-gray: #f8f9fa; --border-color: #dee2e6; --text-dark: #343a40; --text-light: #6c757d; --green: #28a745; --red: #dc3545; --orange: #fd7e14; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f7f6; margin: 0; padding: 10px; color: var(--text-dark); }
+        .container { max-width: 1400px; margin: auto; background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; font-size: 1.8rem; }
         
-        .controls-bar { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 15px; background-color: #f8f9fa; border-radius: 6px; margin-bottom: 20px; }
-        .controls-bar input, .controls-bar select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem; }
-        .controls-bar input[type="search"] { flex-grow: 1; min-width: 200px; }
+        /* Dashboard Stats */
+        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background-color: var(--light-gray); padding: 15px; border-radius: 8px; text-align: center; border-left: 5px solid var(--primary-blue); }
+        .stat-card h3 { margin: 0 0 10px 0; color: var(--text-light); text-transform: uppercase; font-size: 0.8rem; }
+        .stat-card p { margin: 0; font-size: 1.8rem; font-weight: 600; }
+        .stat-card.approved { border-left-color: var(--green); }
+        .stat-card.pending { border-left-color: var(--orange); }
 
-        #user-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        #user-table th, #user-table td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
-        #user-table th { background-color: #f2f2f2; }
-        
-        .action-btn { background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin: 2px; font-weight: 500; }
-        .action-btn.approve { background-color: #28a745; }
-        .action-btn.delete { background-color: #dc3545; }
-        .action-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        .role-select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+        /* Controls */
+        .controls-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 15px; background-color: var(--light-gray); border-radius: 6px; margin-bottom: 20px; }
+        .controls-bar input, .controls-bar select { padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 1rem; }
+        .controls-bar input[type="search"] { flex-grow: 1; min-width: 150px; }
+
+        /* User List - Mobile First Card View */
+        .user-list-container { margin-top: 20px; }
+        .user-card { background-color: #fff; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+        .user-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background-color: var(--light-gray); }
+        .user-name { font-weight: 600; cursor: pointer; color: var(--primary-blue); }
+        .user-name:hover { text-decoration: underline; }
+        .user-card-body { padding: 15px; display: grid; gap: 10px; }
+        .user-info-item { display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .user-info-item strong { color: var(--text-light); }
+        .status-badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; color: white; }
+        .status-approved { background-color: var(--green); }
+        .status-pending { background-color: var(--orange); }
+
+        /* Actions Dropdown */
+        .actions-menu { position: relative; }
+        .actions-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        .actions-dropdown { display: none; position: absolute; right: 0; top: 100%; background-color: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; min-width: 180px; }
+        .actions-dropdown.show { display: block; }
+        .actions-dropdown button { display: block; width: 100%; padding: 10px 15px; background: none; border: none; text-align: left; cursor: pointer; font-size: 0.9rem; }
+        .actions-dropdown button:hover { background-color: var(--light-gray); }
+        .actions-dropdown .delete-action { color: var(--red); }
+
+        /* Modal for User Details */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 600px; border-radius: 8px; position: relative; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-body .user-info-item { border-bottom: 1px solid var(--border-color); padding: 8px 0; }
+
+        #feedback-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 25px; border-radius: 6px; color: white; font-weight: 500; opacity: 0; transition: opacity 0.3s; z-index: 101; pointer-events: none; }
+        #feedback-bar.show { opacity: 1; }
+        #feedback-bar.success { background-color: var(--green); }
+        #feedback-bar.error { background-color: var(--red); }
+
+        /* Desktop Table View */
+        @media (min-width: 992px) {
+            .user-card { display: table-row; background: none; border: none; }
+            .user-card-header, .user-card-body { display: contents; }
+            .user-cell { display: table-cell; vertical-align: middle; padding: 12px; border-bottom: 1px solid var(--border-color); }
+            .user-list-container { display: table; width: 100%; border-collapse: collapse; }
+            .user-list-header { display: table-header-group; font-weight: 600; }
+            .user-list-header .user-cell { background-color: var(--light-gray); }
+            .mobile-only { display: none; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>User Management</h1>
-        <div class="security-warning">
-            <strong>🔴 SECURITY WARNING:</strong> This admin panel is publicly accessible. For a real app, secure this page with an admin login.
+        <h1>Admin Dashboard</h1>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card"><h3>Total Users</h3><p id="total-users">0</p></div>
+            <div class="stat-card approved"><h3>Approved</h3><p id="approved-users">0</p></div>
+            <div class="stat-card pending"><h3>Pending</h3><p id="pending-users">0</p></div>
         </div>
 
         <div class="controls-bar">
-            <input type="search" id="search-input" placeholder="Search by Name, Email, or Mobile...">
-            <select id="status-filter">
-                <option value="all">All Statuses</option>
-                <option value="approved">Approved</option>
-                <option value="pending">Pending</option>
-            </select>
-            <select id="goal-filter">
-                <option value="all">All Goals</option>
-                <option value="NEET">NEET</option>
-                <option value="JEE">JEE</option>
-                <option value="Class 6-10">Class 6-10</option>
-            </select>
-            <select id="class-filter">
-                <option value="all">All Classes</option>
-                <option value="6th">6th</option>
-                <option value="7th">7th</option>
-                <option value="8th">8th</option>
-                <option value="9th">9th</option>
-                <option value="10th">10th</option>
-            </select>
+            <input type="search" id="search-input" placeholder="Search users...">
+            <select id="status-filter"><option value="all">All Statuses</option><option value="approved">Approved</option><option value="pending">Pending</option></select>
+            <select id="goal-filter"><option value="all">All Goals</option><option value="NEET">NEET</option><option value="JEE">JEE</option><option value="Class 6-10">Class 6-10</option></select>
         </div>
 
-        <table id="user-table">
-            <thead>
-                <tr>
-                    <th>Full Name</th><th>Contact</th><th>Goal/Class</th><th>Status</th><th>Role</th><th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="user-list"></tbody>
-        </table>
+        <!-- This container holds both the desktop header and the user list -->
+        <div class="user-list-container" id="user-list-table">
+            <!-- Desktop Header -->
+            <div class="user-list-header mobile-only">
+                <div class="user-cell">User</div>
+                <div class="user-cell">Goal</div>
+                <div class="user-cell">Date Joined</div>
+                <div class="user-cell">Status</div>
+                <div class="user-cell">Actions</div>
+            </div>
+            <!-- User data will be injected here -->
+        </div>
     </div>
+
+    <!-- User Details Modal -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">×</span>
+            <h2 id="modal-user-name">User Details</h2>
+            <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="feedback-bar"></div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script>
-        // Your Firebase Config is now included below
         const firebaseConfig = {
             apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
             authDomain: "xperts-auth.firebaseapp.com",
@@ -80,149 +123,198 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // UI Elements
-        const userListBody = document.getElementById('user-list');
+        
+        // --- DOM Elements ---
+        const userListTable = document.getElementById('user-list-table');
         const searchInput = document.getElementById('search-input');
         const statusFilter = document.getElementById('status-filter');
         const goalFilter = document.getElementById('goal-filter');
-        const classFilter = document.getElementById('class-filter');
+        const totalUsersEl = document.getElementById('total-users');
+        const approvedUsersEl = document.getElementById('approved-users');
+        const pendingUsersEl = document.getElementById('pending-users');
+        const feedbackBar = document.getElementById('feedback-bar');
+        const modal = document.getElementById('details-modal');
+        const modalUserName = document.getElementById('modal-user-name');
+        const modalBody = document.getElementById('modal-body');
+        const closeBtn = document.querySelector('.close-btn');
 
-        let allUsers = []; // Store all users to avoid frequent DB calls
-
-        // Initial Load
+        let allUsers = []; 
         window.onload = loadAndRenderUsers;
+        [searchInput, statusFilter, goalFilter].forEach(el => el.addEventListener('input', applyFiltersAndRender));
+        closeBtn.onclick = () => modal.style.display = 'none';
+        window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } }
 
-        // Add event listeners for filters
-        searchInput.addEventListener('input', applyFiltersAndRender);
-        statusFilter.addEventListener('change', applyFiltersAndRender);
-        goalFilter.addEventListener('change', applyFiltersAndRender);
-        classFilter.addEventListener('change', applyFiltersAndRender);
-
-        // --- Functions ---
+        // --- Core Functions ---
 
         async function loadAndRenderUsers() {
-            userListBody.innerHTML = '<tr><td colspan="6">Loading users...</td></tr>';
             try {
                 const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
                 allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 applyFiltersAndRender();
-            } catch (error) {
-                console.error("Error loading users: ", error);
-                userListBody.innerHTML = '<tr><td colspan="6" style="color: red;">Error: Could not load users. Check Firebase config and console.</td></tr>';
-            }
+            } catch (error) { console.error("Error loading users: ", error); }
         }
 
         function applyFiltersAndRender() {
             const searchTerm = searchInput.value.toLowerCase();
             const status = statusFilter.value;
             const goal = goalFilter.value;
-            const userClass = classFilter.value;
-
-            let filteredUsers = allUsers.filter(user => {
-                // Search filter
-                const matchesSearch = searchTerm === '' ||
-                    user.fullName.toLowerCase().includes(searchTerm) ||
-                    user.email.toLowerCase().includes(searchTerm) ||
-                    user.mobile.includes(searchTerm);
-
-                // Status filter
-                const matchesStatus = status === 'all' ||
-                    (status === 'approved' && user.approved) ||
-                    (status === 'pending' && !user.approved);
-
-                // Goal filter
+            const filteredUsers = allUsers.filter(user => {
+                const matchesSearch = searchTerm === '' || user.fullName.toLowerCase().includes(searchTerm) || user.email.toLowerCase().includes(searchTerm) || user.mobile.includes(searchTerm);
+                const matchesStatus = status === 'all' || (status === 'approved' && user.approved) || (status === 'pending' && !user.approved);
                 const matchesGoal = goal === 'all' || user.goal === goal;
-
-                // Class filter
-                const matchesClass = userClass === 'all' || user.class === userClass;
-
-                return matchesSearch && matchesStatus && matchesGoal && matchesClass;
+                return matchesSearch && matchesStatus && matchesGoal;
             });
-            
-            renderTable(filteredUsers);
+            renderUserList(filteredUsers);
+            renderDashboardStats(allUsers);
         }
 
-        function renderTable(users) {
-            userListBody.innerHTML = '';
+        function renderUserList(users) {
+            // Clear existing users but keep the header
+            document.querySelectorAll('.user-card').forEach(card => card.remove());
+            
             if (users.length === 0) {
-                userListBody.innerHTML = '<tr><td colspan="6">No users match the current filters.</td></tr>';
+                const noResults = document.createElement('div');
+                noResults.className = 'user-card';
+                noResults.innerHTML = `<div style="padding: 20px; text-align: center; width: 100%;">No users match the current filters.</div>`;
+                userListTable.appendChild(noResults);
                 return;
             }
 
             users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.setAttribute('data-id', user.id);
-                const approvalStatus = user.approved ? `<span style="color: green;">Approved</span>` : `<span style="color: orange;">Pending</span>`;
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.setAttribute('data-id', user.id);
+                const joinDate = user.createdAt?.toDate().toLocaleDateString() || 'N/A';
                 
-                const actionButtons = `
-                    ${!user.approved ? `<button class="action-btn approve" onclick="toggleApproval('${user.id}', true)">Approve</button>` : ''}
-                    <button class="action-btn delete" onclick="deleteUser('${user.id}', '${user.fullName}')">Delete</button>
+                // HTML for both mobile and desktop views
+                userCard.innerHTML = `
+                    <!-- Mobile Header / Desktop User Cell -->
+                    <div class="user-card-header user-cell">
+                        <div>
+                            <div class="user-name" onclick="showUserDetails('${user.id}')">${user.fullName}</div>
+                            <small>${user.email}</small>
+                        </div>
+                        <div class="actions-menu mobile-only">
+                            <button class="actions-btn" onclick="toggleActions(event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                            <div class="actions-dropdown">
+                                ${!user.approved ? `<button onclick="toggleApproval('${user.id}', true)">Approve User</button>` : ''}
+                                <button onclick="updateRole('${user.id}')">Change Role</button>
+                                <button class="delete-action" onclick="deleteUser('${user.id}', '${user.fullName}')">Delete User</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Mobile Body / Desktop Cells -->
+                    <div class="user-card-body">
+                        <div class="user-info-item user-cell">
+                            <strong class="mobile-only">Goal:</strong>
+                            <span>${user.goal || 'N/A'}${user.class ? ' - ' + user.class : ''}</span>
+                        </div>
+                        <div class="user-info-item user-cell">
+                             <strong class="mobile-only">Joined:</strong>
+                             <span>${joinDate}</span>
+                        </div>
+                        <div class="user-info-item user-cell">
+                            <strong class="mobile-only">Status:</strong>
+                            <span class="status-badge ${user.approved ? 'status-approved' : 'status-pending'}">${user.approved ? 'Approved' : 'Pending'}</span>
+                        </div>
+                    </div>
+                    <!-- Desktop Actions Cell -->
+                    <div class="user-cell mobile-only">
+                         <div class="actions-menu">
+                            <button class="actions-btn" onclick="toggleActions(event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                            </button>
+                            <div class="actions-dropdown">
+                                ${!user.approved ? `<button onclick="toggleApproval('${user.id}', true)">Approve User</button>` : ''}
+                                <button onclick="updateRole('${user.id}')">Change Role</button>
+                                <button class="delete-action" onclick="deleteUser('${user.id}', '${user.fullName}')">Delete User</button>
+                            </div>
+                        </div>
+                    </div>
                 `;
-
-                tr.innerHTML = `
-                    <td>${user.fullName}</td>
-                    <td>${user.email}<br><small>${user.mobile}</small></td>
-                    <td>${user.goal || 'N/A'}${user.class ? ' - ' + user.class : ''}</td>
-                    <td>${approvalStatus}</td>
-                    <td>
-                        <select class="role-select" onchange="updateRole('${user.id}', this.value)">
-                            <option value="student" ${user.role === 'student' ? 'selected' : ''}>Student</option>
-                            <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher</option>
-                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                        </select>
-                    </td>
-                    <td>${actionButtons}</td>
-                `;
-                userListBody.appendChild(tr);
+                userListTable.appendChild(userCard);
             });
         }
         
+        function renderDashboardStats(users) {
+            totalUsersEl.textContent = users.length;
+            approvedUsersEl.textContent = users.filter(u => u.approved).length;
+            pendingUsersEl.textContent = users.filter(u => !u.approved).length;
+        }
+
+        function showUserDetails(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            modalUserName.textContent = user.fullName;
+            modalBody.innerHTML = `
+                <div class="user-info-item"><strong>Email:</strong> <span>${user.email}</span></div>
+                <div class="user-info-item"><strong>Mobile:</strong> <span>${user.mobile}</span></div>
+                <div class="user-info-item"><strong>Gender:</strong> <span>${user.gender || 'N/A'}</span></div>
+                <div class="user-info-item"><strong>Goal:</strong> <span>${user.goal || 'N/A'}</span></div>
+                <div class="user-info-item"><strong>Class:</strong> <span>${user.class || 'N/A'}</span></div>
+                <div class="user-info-item"><strong>Board:</strong> <span>${user.board || 'N/A'}</span></div>
+                <div class="user-info-item"><strong>Parent's Name:</strong> <span>${user.parentName || 'N/A'}</span></div>
+                <div class="user-info-item"><strong>Parent's Mobile:</strong> <span>${user.parentMobile || 'N/A'}</span></div>
+            `;
+            modal.style.display = 'block';
+        }
+
+        // --- Action Functions ---
+        
+        function toggleActions(event) {
+            event.stopPropagation();
+            const dropdown = event.currentTarget.nextElementSibling;
+            // Close all other dropdowns
+            document.querySelectorAll('.actions-dropdown.show').forEach(d => {
+                if (d !== dropdown) d.classList.remove('show');
+            });
+            dropdown.classList.toggle('show');
+        }
+        document.addEventListener('click', () => document.querySelectorAll('.actions-dropdown.show').forEach(d => d.classList.remove('show')));
+
         async function toggleApproval(userId, newStatus) {
-            const button = event.target; button.disabled = true;
             try {
                 await db.collection('users').doc(userId).update({ approved: newStatus });
-                // Update local data and re-render to avoid DB call
                 const userIndex = allUsers.findIndex(u => u.id === userId);
                 if (userIndex > -1) allUsers[userIndex].approved = newStatus;
                 applyFiltersAndRender();
-            } catch (error) {
-                console.error("Error updating approval:", error);
-                alert("Failed to update approval status.");
-                button.disabled = false;
-            }
+                showFeedback('User approved successfully.', false);
+            } catch (error) { showFeedback('Failed to approve user.', true); }
         }
         
-        async function updateRole(userId, newRole) {
-            try {
-                await db.collection('users').doc(userId).update({ role: newRole });
-                // Update local data
-                const userIndex = allUsers.findIndex(u => u.id === userId);
-                if (userIndex > -1) allUsers[userIndex].role = newRole;
-                alert('Role updated successfully!');
-            } catch (error) {
-                console.error("Error updating role:", error);
-                alert("Failed to update role.");
+        async function updateRole(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            const currentRole = user.role;
+            const newRole = prompt(`Enter new role for ${user.fullName} (student, teacher, or admin):`, currentRole);
+            if (newRole && ['student', 'teacher', 'admin'].includes(newRole)) {
+                try {
+                    await db.collection('users').doc(userId).update({ role: newRole });
+                    user.role = newRole;
+                    showFeedback('Role updated successfully.', false);
+                } catch (error) { showFeedback('Failed to update role.', true); }
+            } else if (newRole !== null) {
+                alert('Invalid role. Please enter student, teacher, or admin.');
             }
         }
 
         async function deleteUser(userId, userName) {
-            const confirmation = confirm(`Are you sure you want to delete the user "${userName}"? This will only remove their data from this database.\n\nIMPORTANT: You must still manually delete them from the Firebase "Authentication" tab to fully remove their account.`);
+            const confirmation = confirm(`Are you sure you want to delete "${userName}"?\nThis cannot be undone.`);
             if (!confirmation) return;
-
             try {
-                // Delete user from Firestore
                 await db.collection('users').doc(userId).delete();
-                
-                // Remove from local array and re-render
                 allUsers = allUsers.filter(u => u.id !== userId);
                 applyFiltersAndRender();
+                showFeedback(`User "${userName}" has been deleted.`, false);
+            } catch (error) { showFeedback('Failed to delete user data.', true); }
+        }
 
-                alert(`User "${userName}" data has been deleted from the database.`);
-            } catch (error) {
-                console.error("Error deleting user data:", error);
-                alert("Failed to delete user data. See console for details.");
-            }
+        function showFeedback(message, isError = false) {
+            feedbackBar.textContent = message;
+            feedbackBar.className = isError ? 'error' : 'success';
+            feedbackBar.classList.add('show');
+            setTimeout(() => feedbackBar.classList.remove('show'), 3000);
         }
     </script>
 </body>
