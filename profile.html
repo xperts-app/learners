@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ALLEN</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background-color: #fff; text-align: center; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 500px; width: 100%; }
+        #welcome-message { font-size: 1.8rem; font-weight: 600; color: #333; margin-bottom: 20px; }
+        .btn { display: inline-block; text-decoration: none; font-size: 1rem; font-weight: 500; color: #fff; background-color: #007bff; padding: 12px 24px; border-radius: 6px; transition: background-color 0.2s; margin: 10px; border: none; cursor: pointer; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn:hover { background-color: #0056b3; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        #auth-guard { font-size: 1.2rem; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-content" style="display: none;">
+        <div class="container">
+            <h1 id="welcome-message">Welcome!</h1>
+            <p>What would you like to do?</p>
+            <div>
+                <!-- Primary action to go to the external student portal -->
+                <a href="https://abc.xyz/s" class="btn">Go to Student Portal</a>
+                <!-- Secondary action to edit profile -->
+                <a href="profile.html" class="btn btn-secondary">Edit My Profile</a>
+            </div>
+             <div style="margin-top: 20px;">
+                <button id="logout-btn" class="btn btn-secondary" style="background-color: #dc3545;">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="auth-guard">
+        <p>Verifying your session...</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+            authDomain: "xperts-auth.firebaseapp.com",
+            projectId: "xperts-auth",
+            storageBucket: "xperts-auth.appspot.com",
+            messagingSenderId: "143568403446",
+            appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+            measurementId: "G-082839CKEM"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const dashboardContent = document.getElementById('dashboard-content');
+        const authGuard = document.getElementById('auth-guard');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in.
+                dashboardContent.style.display = 'block';
+                authGuard.style.display = 'none';
+                welcomeMessage.textContent = `Welcome, ${user.displayName || 'Student'}!`;
+            } else {
+                // No user is signed in.
+                authGuard.innerHTML = '<p>You are not logged in. Redirecting...</p>';
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                alert('You have been logged out.');
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>
