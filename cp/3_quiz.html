@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body id="page-quiz">
+    <div class="container">
+        <div class="header">
+            <h3 id="question-number">Question 1 of N</h3>
+        </div>
+        
+        <div class="quiz-carousel">
+            <div class="quiz-wrapper" id="quiz-wrapper">
+                <!-- Question slides will be injected here -->
+            </div>
+        </div>
+
+        <div class="quiz-nav">
+            <button id="prev-btn" class="btn btn-secondary">Previous</button>
+            <button id="next-btn" class="btn btn-primary">Next</button>
+            <button id="submit-btn" class="btn btn-primary" style="display: none;">Submit Quiz</button>
+        </div>
+    </div>
+    <script src="js/data.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
+</html>
