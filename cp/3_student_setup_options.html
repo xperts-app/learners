@@ -3,110 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Options</title>
-    <!-- Firebase SDK Scripts -->
+    <title>Custom Practice</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <!-- IMPORTANT: CHANGE THIS SCRIPT! -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f0f4ff; color: #333; margin: 0; padding: 1rem; }
-        .container { max-width: 700px; margin: auto; }
-        .header { text-align: center; margin-bottom: 2rem; }
-        .card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 1.2rem;}
-        select { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #dee2e6; font-size: 1rem; }
-        .btn { display: block; width: 100%; padding: 0.85rem; border: none; border-radius: 8px; background-color: #007bff; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
-        .btn:disabled { background-color: #aaa; cursor: not-allowed; }
-    </style>
+    <style>:root{--primary-blue:#3d8bff;--light-blue:#e7f1ff;--background-color:#f7f8fc;--card-background:#ffffff;--text-primary:#212529;--text-secondary:#6c757d;--border-color:#e9ecef;--light-grey-bg:#f8f9fa;--shadow:0 4px 15px rgba(0,0,0,0.06);--font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}body{font-family:var(--font-family);background-color:var(--background-color);color:var(--text-primary);margin:0;padding-top:60px}.container{max-width:800px;margin:0 auto;padding:1rem}.app-header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;background-color:var(--card-background);padding:0 1rem;height:60px;border-bottom:1px solid var(--border-color);z-index:1000}.back-arrow{font-size:1.8rem;text-decoration:none;color:var(--text-primary);margin-right:1rem}.app-header h1{font-size:1.2rem;margin:0}.card{background:var(--card-background);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.btn{display:inline-block;width:100%;box-sizing:border-box;padding:.9rem 1.5rem;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:transform .1s ease-out}.btn:active{transform:scale(.98)}.btn:disabled{background-color:#aaa;cursor:not-allowed}.btn-primary{background-color:var(--primary-blue);color:#fff}.form-group{margin-bottom:1rem}.form-group label{display:block;margin-bottom:.5rem;font-weight:500;color:var(--text-secondary)}select{width:100%;padding:.8rem 1rem;border-radius:10px;border:1px solid var(--border-color);background-color:var(--light-grey-bg);font-size:1rem;box-sizing:border-box;color:var(--text-primary)}select:focus{outline:none;border-color:var(--primary-blue);box-shadow:0 0 0 2px var(--light-blue)}</style>
 </head>
 <body>
+    <header class="app-header">
+        <a href="#" onclick="history.back();" class="back-arrow">←</a><h1>Custom Practice</h1>
+    </header>
     <div class="container">
-        <div class="header"><h1>Quiz Settings</h1></div>
         <form id="options-form">
-            <div class="card"><div class="form-group"><label for="difficulty-level">Difficulty Level</label><select id="difficulty-level"><option value="All">All (Easy, Medium, Hard)</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div></div>
-            <div class="card"><div class="form-group"><label for="num-questions">Number of Questions</label><select id="num-questions"><option value="10">10</option><option value="20">20</option><option value="40">40</option><option value="60">60</option></select></div></div>
-            <button type="submit" id="start-quiz-btn" class="btn">Start Quiz</button>
+            <div class="card"><div class="form-group"><label>Difficulty level</label><select id="difficulty-level"><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option><option value="All" selected>All Levels</option></select></div></div>
+            <div class="card"><div class="form-group"><label>No. of questions</label><select id="num-questions"><option value="10">10</option><option value="20" selected>20</option><option value="40">40</option><option value="60">60</option></select></div></div>
+            <button type="submit" id="start-quiz-btn" class="btn btn-primary">Start Quiz</button>
         </form>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const firebaseConfig = {
-              apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
-              authDomain: "xperts-auth.firebaseapp.com",
-              projectId: "xperts-auth",
-              storageBucket: "xperts-auth.appspot.com",
-              messagingSenderId: "143568403446",
-              appId: "1:143568403446:web:669a8964aa88aab9b065d7"
-            };
-
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            // --- CHANGE 1: Initialize Firestore ---
+            const firebaseConfig = { apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs", authDomain: "xperts-auth.firebaseapp.com", projectId: "xperts-auth", storageBucket: "xperts-auth.appspot.com", messagingSenderId: "143568403446", appId: "1:143568403446:web:669a8964aa88aab9b065d7" };
+            if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
             const db = firebase.firestore();
-            
             const startBtn = document.getElementById('start-quiz-btn');
-
             document.getElementById('options-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                startBtn.disabled = true;
-                startBtn.textContent = 'Preparing Quiz...';
-
-                const className = sessionStorage.getItem('selectedClass');
-                const subjectName = sessionStorage.getItem('selectedSubject');
-                const selectedChapters = JSON.parse(sessionStorage.getItem('selectedChapters'));
-                const difficulty = document.getElementById('difficulty-level').value;
-                const numQuestions = parseInt(document.getElementById('num-questions').value, 10);
-
-                if (!className || !subjectName || !selectedChapters) {
-                    alert("Error: Missing quiz setup data. Please go back and select chapters.");
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                // --- CHANGE 2: Update the Fetching Logic ---
+                startBtn.disabled = true; startBtn.textContent = 'Preparing Quiz...';
+                const className = sessionStorage.getItem('selectedClass'), subjectName = sessionStorage.getItem('selectedSubject'), selectedChapters = JSON.parse(sessionStorage.getItem('selectedChapters')), difficulty = document.getElementById('difficulty-level').value, numQuestions = parseInt(document.getElementById('num-questions').value, 10);
+                if (!className || !subjectName || !selectedChapters) { alert("Error: Missing quiz data. Please go back."); window.location.href = 'index.html'; return; }
                 try {
-                    // Start building the query
-                    let query = db.collection('questions')
-                        .where('class', '==', className)
-                        .where('subject', '==', subjectName)
-                        .where('chapter', 'in', selectedChapters); // 'in' operator is powerful!
-
-                    // Conditionally add the difficulty filter
-                    if (difficulty !== 'All') {
-                        query = query.where('difficulty', '==', difficulty);
-                    }
-
+                    let query = db.collection('questions').where('class', '==', className).where('subject', '==', subjectName).where('chapter', 'in', selectedChapters);
+                    if (difficulty !== 'All') { query = query.where('difficulty', '==', difficulty); }
                     const querySnapshot = await query.get();
                     let allQuestions = [];
-                    querySnapshot.forEach((doc) => {
-                        // doc.data() is the question object
-                        allQuestions.push(doc.data());
-                    });
-                    
-                    if (allQuestions.length === 0) {
-                        alert('No questions found for the selected criteria. Please try different options.');
-                        startBtn.disabled = false;
-                        startBtn.textContent = 'Start Quiz';
-                        return;
-                    }
-
-                    // Shuffle and slice to get the final quiz questions
-                    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
-                    const quizQuestions = shuffled.slice(0, numQuestions);
-
+                    querySnapshot.forEach((doc) => { allQuestions.push({id: doc.id, ...doc.data()}); });
+                    if (allQuestions.length === 0) { alert('No questions found for the selected criteria.'); startBtn.disabled = false; startBtn.textContent = 'Start Quiz'; return; }
+                    const quizQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, numQuestions);
                     sessionStorage.setItem('currentQuiz', JSON.stringify(quizQuestions));
                     window.location.href = '4_quiz.html';
-
                 } catch (error) {
-                    console.error("Failed to fetch questions:", error);
-                    // This error can happen if you haven't created a Firestore index. 
-                    // The error message in the console will give you a link to create it automatically!
-                    alert("An error occurred. Check the console for details. You may need to create a Firestore index.");
-                    startBtn.disabled = false;
-                    startBtn.textContent = 'Start Quiz';
+                    console.error("Error fetching questions:", error); alert("An error occurred. Check the console for details (you may need to create a Firestore index).");
+                    startBtn.disabled = false; startBtn.textContent = 'Start Quiz';
                 }
             });
         });
