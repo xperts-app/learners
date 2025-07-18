@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Custom YouTube Player</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .progress-bar::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+  <div class="w-full max-w-3xl p-4">
+    <div id="player" class="aspect-video bg-black rounded-lg overflow-hidden"></div>
+
+    <div class="mt-4 flex items-center gap-4">
+      <button id="playPauseBtn" class="text-white text-2xl">
+        ▶️
+      </button>
+      <input
+        type="range"
+        id="progressBar"
+        value="0"
+        min="0"
+        max="100"
+        class="w-full progress-bar appearance-none h-2 bg-white/30 rounded-lg"
+      />
+      <span id="timeLabel" class="text-sm text-gray-300 min-w-[70px] text-right">0:00 / 0:00</span>
+    </div>
+  </div>
+
+  <script>
+    let player;
+    let isPlaying = false;
+    let duration = 0;
+
+    function getYouTubeID(url) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'youtu.be') {
+          return parsed.pathname.slice(1);
+        }
+        if (parsed.hostname.includes('youtube.com')) {
+          return parsed.searchParams.get('v');
+        }
+      } catch (e) {
+        return null;
+      }
+      return null;
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function onYouTubeIframeAPIReady() {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get("url");
+      const videoId = getYouTubeID(url);
+
+      if (!videoId) {
+        document.getElementById("player").innerHTML = "Invalid YouTube URL";
+        return;
+      }
+
+      player = new YT.Player("player", {
+        videoId: videoId,
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        },
+        playerVars: {
+          modestbranding: 1,
+          controls: 0,
+          rel: 0
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      duration = player.getDuration();
+
+      document.getElementById("playPauseBtn").onclick = () => {
+        if (isPlaying) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      };
+
+      document.getElementById("progressBar").addEventListener("input", e => {
+        const seekTo = (e.target.value / 100) * duration;
+        player.seekTo(seekTo, true);
+      });
+
+      updateProgress();
+    }
+
+    function onPlayerStateChange(event) {
+      isPlaying = event.data === YT.PlayerState.PLAYING;
+      document.getElementById("playPauseBtn").textContent = isPlaying ? "⏸️" : "▶️";
+    }
+
+    function updateProgress() {
+      if (player && player.getCurrentTime) {
+        const currentTime = player.getCurrentTime();
+        const progress = (currentTime / duration) * 100;
+        document.getElementById("progressBar").value = progress || 0;
+        document.getElementById("timeLabel").textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+      }
+      requestAnimationFrame(updateProgress);
+    }
+  </script>
+</body>
+</html>
