@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher - Add Question</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body id="page-teacher">
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-arrow">←</a>
+            <h1>Add New Question</h1>
+        </div>
+        <form id="question-form" class="card">
+            <!-- Dropdowns for class, subject, chapter -->
+            <div class="form-group"><label>Class:</label><select id="class-select" required><option value="">Select Class</option></select></div>
+            <div class="form-group"><label>Subject:</label><select id="subject-select" required><option value="">Select Subject</option></select></div>
+            <div class="form-group"><label>Chapter:</label><select id="chapter-select" required><option value="">Select Chapter</option></select></div>
+            <div class="form-group"><label>Difficulty:</label><select id="difficulty-select" required><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div>
+            
+            <!-- Question fields -->
+            <div class="form-group"><label>Question Text:</label><textarea id="question-text" rows="3" required></textarea></div>
+            <div class="form-group"><label>Option A:</label><input type="text" id="option-a" required></div>
+            <div class="form-group"><label>Option B:</label><input type="text" id="option-b" required></div>
+            <div class="form-group"><label>Option C:</label><input type="text" id="option-c" required></div>
+            <div class="form-group"><label>Option D:</label><input type="text" id="option-d" required></div>
+            <div class="form-group"><label>Correct Answer:</label><select id="correct-answer" required><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+            <div class="form-group"><label>Detailed Solution:</label><textarea id="solution-text" rows="4" required></textarea></div>
+
+            <button type="submit" class="btn btn-primary">Save Question</button>
+        </form>
+    </div>
+    <script src="js/data.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
+</html>
