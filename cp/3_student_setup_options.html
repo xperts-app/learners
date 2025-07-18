@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Options</title>
+    <!-- Firebase SDK Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f0f4ff; color: #333; margin: 0; padding: 1rem; }
+        .container { max-width: 700px; margin: auto; }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 1.2rem;}
+        select { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #dee2e6; font-size: 1rem; }
+        .btn { display: block; width: 100%; padding: 0.85rem; border: none; border-radius: 8px; background-color: #007bff; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
+        .btn:disabled { background-color: #aaa; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>Quiz Settings</h1></div>
+        <form id="options-form">
+            <div class="card">
+                <div class="form-group">
+                    <label for="difficulty-level">Difficulty Level</label>
+                    <select id="difficulty-level">
+                        <option value="All">All (Easy, Medium, Hard)</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label for="num-questions">Number of Questions</label>
+                    <select id="num-questions">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="40">40</option>
+                        <option value="60">60</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" id="start-quiz-btn" class="btn">Start Quiz</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+              authDomain: "xperts-auth.firebaseapp.com",
+              projectId: "xperts-auth",
+              storageBucket: "xperts-auth.appspot.com",
+              messagingSenderId: "143568403446",
+              appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+              databaseURL: "https://xperts-auth-default-rtdb.firebaseio.com"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.database();
+            
+            const startBtn = document.getElementById('start-quiz-btn');
+
+            document.getElementById('options-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                startBtn.disabled = true;
+                startBtn.textContent = 'Preparing Quiz...';
+
+                // Get settings from sessionStorage and the form
+                const className = sessionStorage.getItem('selectedClass');
+                const subjectName = sessionStorage.getItem('selectedSubject');
+                const selectedChapters = JSON.parse(sessionStorage.getItem('selectedChapters'));
+                const difficulty = document.getElementById('difficulty-level').value;
+                const numQuestions = parseInt(document.getElementById('num-questions').value, 10);
+
+                if (!className || !subjectName || !selectedChapters) {
+                    alert("Error: Missing quiz setup data. Please go back and select chapters.");
+                    window.location.href = 'index.html'; // Or a relevant start page
+                    return;
+                }
+
+                // Fetch all questions for the selected chapters from Firebase
+                const promises = selectedChapters.map(chapter => {
+                    const path = `questions/${className}/${subjectName}/${chapter}`;
+                    return db.ref(path).once('value');
+                });
+
+                try {
+                    const snapshots = await Promise.all(promises);
+                    let allQuestions = [];
+                    snapshots.forEach(snapshot => {
+                        const questions = snapshot.val();
+                        if (questions) {
+                            allQuestions.push(...Object.values(questions));
+                        }
+                    });
+
+                    // Filter by difficulty
+                    let filteredQuestions = allQuestions;
+                    if (difficulty !== 'All') {
+                        filteredQuestions = allQuestions.filter(q => q.difficulty === difficulty);
+                    }
+
+                    if (filteredQuestions.length === 0) {
+                        alert('No questions found for the selected criteria. Please try different options.');
+                        startBtn.disabled = false;
+                        startBtn.textContent = 'Start Quiz';
+                        return;
+                    }
+
+                    // Shuffle and slice to get the final quiz questions
+                    const shuffled = filteredQuestions.sort(() => 0.5 - Math.random());
+                    const quizQuestions = shuffled.slice(0, numQuestions);
+
+                    // Save the final quiz to sessionStorage and redirect
+                    sessionStorage.setItem('currentQuiz', JSON.stringify(quizQuestions));
+                    window.location.href = '4_quiz.html';
+
+                } catch (error) {
+                    console.error("Failed to fetch questions:", error);
+                    alert("An error occurred while preparing your quiz. Please try again.");
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Start Quiz';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
