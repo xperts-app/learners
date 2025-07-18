@@ -6,7 +6,8 @@
     <title>Quiz Options</title>
     <!-- Firebase SDK Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- IMPORTANT: CHANGE THIS SCRIPT! -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f0f4ff; color: #333; margin: 0; padding: 1rem; }
@@ -23,28 +24,8 @@
     <div class="container">
         <div class="header"><h1>Quiz Settings</h1></div>
         <form id="options-form">
-            <div class="card">
-                <div class="form-group">
-                    <label for="difficulty-level">Difficulty Level</label>
-                    <select id="difficulty-level">
-                        <option value="All">All (Easy, Medium, Hard)</option>
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card">
-                <div class="form-group">
-                    <label for="num-questions">Number of Questions</label>
-                    <select id="num-questions">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="40">40</option>
-                        <option value="60">60</option>
-                    </select>
-                </div>
-            </div>
+            <div class="card"><div class="form-group"><label for="difficulty-level">Difficulty Level</label><select id="difficulty-level"><option value="All">All (Easy, Medium, Hard)</option><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div></div>
+            <div class="card"><div class="form-group"><label for="num-questions">Number of Questions</label><select id="num-questions"><option value="10">10</option><option value="20">20</option><option value="40">40</option><option value="60">60</option></select></div></div>
             <button type="submit" id="start-quiz-btn" class="btn">Start Quiz</button>
         </form>
     </div>
@@ -57,14 +38,14 @@
               projectId: "xperts-auth",
               storageBucket: "xperts-auth.appspot.com",
               messagingSenderId: "143568403446",
-              appId: "1:143568403446:web:669a8964aa88aab9b065d7",
-              databaseURL: "https://xperts-auth-default-rtdb.firebaseio.com"
+              appId: "1:143568403446:web:669a8964aa88aab9b065d7"
             };
 
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
-            const db = firebase.database();
+            // --- CHANGE 1: Initialize Firestore ---
+            const db = firebase.firestore();
             
             const startBtn = document.getElementById('start-quiz-btn');
 
@@ -73,7 +54,6 @@
                 startBtn.disabled = true;
                 startBtn.textContent = 'Preparing Quiz...';
 
-                // Get settings from sessionStorage and the form
                 const className = sessionStorage.getItem('selectedClass');
                 const subjectName = sessionStorage.getItem('selectedSubject');
                 const selectedChapters = JSON.parse(sessionStorage.getItem('selectedChapters'));
@@ -82,33 +62,31 @@
 
                 if (!className || !subjectName || !selectedChapters) {
                     alert("Error: Missing quiz setup data. Please go back and select chapters.");
-                    window.location.href = 'index.html'; // Or a relevant start page
+                    window.location.href = 'index.html';
                     return;
                 }
 
-                // Fetch all questions for the selected chapters from Firebase
-                const promises = selectedChapters.map(chapter => {
-                    const path = `questions/${className}/${subjectName}/${chapter}`;
-                    return db.ref(path).once('value');
-                });
-
+                // --- CHANGE 2: Update the Fetching Logic ---
                 try {
-                    const snapshots = await Promise.all(promises);
-                    let allQuestions = [];
-                    snapshots.forEach(snapshot => {
-                        const questions = snapshot.val();
-                        if (questions) {
-                            allQuestions.push(...Object.values(questions));
-                        }
-                    });
+                    // Start building the query
+                    let query = db.collection('questions')
+                        .where('class', '==', className)
+                        .where('subject', '==', subjectName)
+                        .where('chapter', 'in', selectedChapters); // 'in' operator is powerful!
 
-                    // Filter by difficulty
-                    let filteredQuestions = allQuestions;
+                    // Conditionally add the difficulty filter
                     if (difficulty !== 'All') {
-                        filteredQuestions = allQuestions.filter(q => q.difficulty === difficulty);
+                        query = query.where('difficulty', '==', difficulty);
                     }
 
-                    if (filteredQuestions.length === 0) {
+                    const querySnapshot = await query.get();
+                    let allQuestions = [];
+                    querySnapshot.forEach((doc) => {
+                        // doc.data() is the question object
+                        allQuestions.push(doc.data());
+                    });
+                    
+                    if (allQuestions.length === 0) {
                         alert('No questions found for the selected criteria. Please try different options.');
                         startBtn.disabled = false;
                         startBtn.textContent = 'Start Quiz';
@@ -116,16 +94,17 @@
                     }
 
                     // Shuffle and slice to get the final quiz questions
-                    const shuffled = filteredQuestions.sort(() => 0.5 - Math.random());
+                    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
                     const quizQuestions = shuffled.slice(0, numQuestions);
 
-                    // Save the final quiz to sessionStorage and redirect
                     sessionStorage.setItem('currentQuiz', JSON.stringify(quizQuestions));
                     window.location.href = '4_quiz.html';
 
                 } catch (error) {
                     console.error("Failed to fetch questions:", error);
-                    alert("An error occurred while preparing your quiz. Please try again.");
+                    // This error can happen if you haven't created a Firestore index. 
+                    // The error message in the console will give you a link to create it automatically!
+                    alert("An error occurred. Check the console for details. You may need to create a Firestore index.");
                     startBtn.disabled = false;
                     startBtn.textContent = 'Start Quiz';
                 }
