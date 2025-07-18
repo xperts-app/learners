@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Advanced YouTube Player</title>
+  <title>Custom YouTube Player</title>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -17,42 +17,54 @@
     }
   </style>
 </head>
-<body class="bg-black text-white m-0 overflow-hidden">
+<body class="bg-black text-white overflow-hidden m-0">
 
   <div class="flex flex-col h-screen w-screen">
-    <!-- Video Player -->
-    <div id="player" class="flex-grow w-full"></div>
+    <!-- YouTube Video Container -->
+    <div id="player" class="flex-grow w-full bg-black"></div>
 
     <!-- Controls -->
-    <div class="bg-gray-900/80 p-4 flex items-center gap-4">
+    <div class="bg-gray-900/90 p-4 flex items-center gap-4 w-full">
       <!-- Play/Pause -->
       <button id="playPauseBtn" class="text-white">
-        <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M5 3v18l15-9L5 3z" />
+        <svg id="playIcon" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+          <path d="M5 3l14 9-14 9V3z" />
         </svg>
-        <svg id="pauseIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+        <svg id="pauseIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+          <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
         </svg>
       </button>
 
-      <!-- Progress -->
+      <!-- Progress Bar -->
       <input type="range" id="progressBar" value="0" min="0" max="100"
-        class="progress-bar w-full appearance-none h-2 bg-white/30 rounded"/>
+        class="progress-bar w-full h-2 bg-white/30 rounded"/>
 
       <!-- Time -->
       <span id="timeLabel" class="text-sm text-gray-300 min-w-[90px] text-right">0:00 / 0:00</span>
 
-      <!-- Speed -->
-      <select id="speedControl" class="bg-gray-800 text-white text-sm rounded px-2 py-1">
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="1.5">1.5×</option>
-        <option value="2">2×</option>
-      </select>
+      <!-- Speed Control -->
+      <div class="flex items-center gap-1">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M12 6v6l4 2" stroke-width="2" />
+        </svg>
+        <select id="speedControl" class="bg-gray-800 text-white text-sm rounded px-2 py-1">
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.5">1.5×</option>
+          <option value="2">2×</option>
+        </select>
+      </div>
 
       <!-- Volume -->
-      <input id="volumeControl" type="range" min="0" max="100" value="100"
-        class="w-24 appearance-none h-2 bg-white/30 rounded"/>
+      <div class="flex items-center gap-1">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M11 5L6 9H2v6h4l5 4V5z" stroke-width="2" />
+        </svg>
+        <input id="volumeControl" type="range" min="0" max="100" value="100"
+          class="w-24 h-2 bg-white/30 rounded"/>
+      </div>
     </div>
   </div>
 
@@ -90,14 +102,15 @@
 
       player = new YT.Player("player", {
         videoId,
+        playerVars: {
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0
+        },
         events: {
           onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
-        },
-        playerVars: {
-          modestbranding: 1,
-          controls: 0,
-          rel: 0,
+          onStateChange: onPlayerStateChange
         }
       });
     }
