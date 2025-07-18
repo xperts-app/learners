@@ -4,37 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher - Add Question</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Firebase SDK Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Your Data -->
+    <script src="data.js"></script>
+
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 1rem; }
+        .container { max-width: 700px; margin: auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #007bff; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        select, input, textarea { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #dee2e6; font-size: 1rem; box-sizing: border-box; }
+        .btn { display: block; width: 100%; padding: 0.85rem; border: none; border-radius: 8px; background-color: #007bff; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .btn:hover { background-color: #0056b3; }
+    </style>
 </head>
-<body id="page-teacher">
+<body>
+
     <div class="container">
-        <div class="header">
-            <a href="index.html" class="back-arrow">←</a>
-            <h1>Add New Question</h1>
-        </div>
-        <form id="question-form" class="card">
-            <!-- Dropdowns for class, subject, chapter -->
-            <div class="form-group"><label>Class:</label><select id="class-select" required><option value="">Select Class</option></select></div>
-            <div class="form-group"><label>Subject:</label><select id="subject-select" required><option value="">Select Subject</option></select></div>
-            <div class="form-group"><label>Chapter:</label><select id="chapter-select" required><option value="">Select Chapter</option></select></div>
-            <div class="form-group"><label>Difficulty:</label><select id="difficulty-select" required><option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option></select></div>
-            
-            <!-- Question fields -->
-            <div class="form-group"><label>Question Text:</label><textarea id="question-text" rows="3" required></textarea></div>
+        <h1>Add New Question</h1>
+        <form id="question-form">
+            <div class="form-group">
+                <label for="class-select">Class:</label>
+                <select id="class-select" required><option value="">Select Class</option></select>
+            </div>
+            <div class="form-group">
+                <label for="subject-select">Subject:</label>
+                <select id="subject-select" required><option value="">Select Subject</option></select>
+            </div>
+            <div class="form-group">
+                <label for="chapter-select">Chapter:</label>
+                <select id="chapter-select" required><option value="">Select Chapter</option></select>
+            </div>
+            <hr style="margin: 2rem 0; border: 1px solid #eee;">
+            <div class="form-group">
+                <label for="question-text">Question Text:</label>
+                <textarea id="question-text" rows="3" required></textarea>
+            </div>
             <div class="form-group"><label>Option A:</label><input type="text" id="option-a" required></div>
             <div class="form-group"><label>Option B:</label><input type="text" id="option-b" required></div>
             <div class="form-group"><label>Option C:</label><input type="text" id="option-c" required></div>
             <div class="form-group"><label>Option D:</label><input type="text" id="option-d" required></div>
-            <div class="form-group"><label>Correct Answer:</label><select id="correct-answer" required><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
-            <div class="form-group"><label>Detailed Solution:</label><textarea id="solution-text" rows="4" required></textarea></div>
-
-            <button type="submit" class="btn btn-primary">Save Question</button>
+            <div class="form-group">
+                <label for="correct-answer">Correct Answer:</label>
+                <select id="correct-answer" required>
+                    <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="difficulty-select">Difficulty:</label>
+                <select id="difficulty-select" required>
+                    <option value="Easy">Easy</option><option value="Medium">Medium</option><option value="Hard">Hard</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="solution-text">Detailed Solution:</label>
+                <textarea id="solution-text" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn">Save Question</button>
         </form>
     </div>
-    <script src="js/data.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/scripts.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Your Firebase config
+            const firebaseConfig = {
+              apiKey: "AIzaSyBBB2_DHwjdxZpMJYnTSC0BeQKCKP0xlWs",
+              authDomain: "xperts-auth.firebaseapp.com",
+              projectId: "xperts-auth",
+              storageBucket: "xperts-auth.appspot.com",
+              messagingSenderId: "143568403446",
+              appId: "1:143568403446:web:669a8964aa88aab9b065d7",
+              databaseURL: "https://xperts-auth-default-rtdb.firebaseio.com"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.database();
+
+            const classSelect = document.getElementById('class-select');
+            const subjectSelect = document.getElementById('subject-select');
+            const chapterSelect = document.getElementById('chapter-select');
+
+            // Populate Class dropdown
+            for (const className in academicData) {
+                classSelect.innerHTML += `<option value="${className}">${className}</option>`;
+            }
+
+            // Handle class change
+            classSelect.addEventListener('change', () => {
+                const selectedClass = classSelect.value;
+                subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+                chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+                if (selectedClass) {
+                    for (const subjectName in academicData[selectedClass]) {
+                        subjectSelect.innerHTML += `<option value="${subjectName}">${subjectName}</option>`;
+                    }
+                }
+            });
+
+            // Handle subject change
+            subjectSelect.addEventListener('change', () => {
+                const selectedClass = classSelect.value;
+                const selectedSubject = subjectSelect.value;
+                chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+                if (selectedSubject) {
+                    academicData[selectedClass][selectedSubject].forEach(chapter => {
+                        chapterSelect.innerHTML += `<option value="${chapter}">${chapter}</option>`;
+                    });
+                }
+            });
+
+            // Handle Form Submission
+            document.getElementById('question-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const questionData = {
+                    class: classSelect.value,
+                    subject: subjectSelect.value,
+                    chapter: chapterSelect.value,
+                    difficulty: document.getElementById('difficulty-select').value,
+                    questionText: document.getElementById('question-text').value,
+                    options: {
+                        A: document.getElementById('option-a').value,
+                        B: document.getElementById('option-b').value,
+                        C: document.getElementById('option-c').value,
+                        D: document.getElementById('option-d').value,
+                    },
+                    correctAnswer: document.getElementById('correct-answer').value,
+                    solution: document.getElementById('solution-text').value
+                };
+
+                const dbPath = `questions/${questionData.class}/${questionData.subject}/${questionData.chapter}`;
+                
+                db.ref(dbPath).push(questionData)
+                    .then(() => {
+                        alert('Question saved successfully!');
+                        e.target.reset();
+                        classSelect.dispatchEvent(new Event('change'));
+                    })
+                    .catch(error => {
+                        console.error("Error saving question: ", error);
+                        alert('Error saving question. Check console.');
+                    });
+            });
+        });
+    </script>
+
 </body>
 </html>
