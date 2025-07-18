@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Result</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body id="page-result">
+    <div class="container" style="text-align: center;">
+        <div class="header" style="justify-content: center;">
+            <h1>Result</h1>
+        </div>
+
+        <div class="card">
+            <h2>You could do better!</h2>
+            <div class="result-summary">
+                <div class="result-item">
+                    <div class="value" id="correct-count">0/0</div>
+                    <div class="label">Correct</div>
+                </div>
+                <div class="result-item">
+                    <div class="value" id="marks-count">0</div>
+                    <div class="label">Marks</div>
+                </div>
+            </div>
+        </div>
+
+        <a href="5_review.html" class="btn btn-primary" style="width: 100%;">Review Solutions</a>
+        <a href="index.html" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Go to Home</a>
+    </div>
+    <script src="js/data.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/scripts.js"></script>
+</body>
+</html>
