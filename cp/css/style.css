@@ -1,0 +1,185 @@
+/* css/style.css */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #f0f4ff;
+    --light-bg: #f8f9fa;
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --correct-color: #28a745;
+    --incorrect-color: #dc3545;
+    --white: #fff;
+    --shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0 1rem 5rem 1rem; /* Padding for content + bottom nav space */
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    margin-left: 1rem;
+}
+
+.back-arrow {
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+select, input[type="text"], textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* Quiz Styles */
+.quiz-carousel {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.quiz-wrapper {
+    display: flex;
+    transition: transform 0.3s ease-in-out;
+}
+
+.question-slide {
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 0 1rem;
+}
+
+.option {
+    background-color: var(--secondary-color);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.option.selected {
+    border-color: var(--primary-color);
+    background-color: #dceaff;
+}
+
+.option.correct {
+    border-color: var(--correct-color);
+    background-color: #d4edda;
+}
+
+.option.incorrect {
+    border-color: var(--incorrect-color);
+    background-color: #f8d7da;
+}
+
+.quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+/* Result Styles */
+.result-summary {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+.result-item {
+    padding: 1rem;
+}
+.result-item .value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+.result-item .label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Review Styles */
+.review-list .question-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+.review-list .question-item.correct { border-left: 5px solid var(--correct-color); }
+.review-list .question-item.incorrect { border-left: 5px solid var(--incorrect-color); }
