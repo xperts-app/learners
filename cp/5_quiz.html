@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+    <style>:root{--primary-blue:#3d8bff;--light-blue:#e7f1ff;--background-color:#f7f8fc;--card-background:#ffffff;--text-primary:#212529;--text-secondary:#6c757d;--border-color:#e9ecef;--correct-color:#28a745;--shadow:0 4px 15px rgba(0,0,0,0.06);--font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}body{font-family:var(--font-family);background-color:var(--background-color);color:var(--text-primary);margin:0;padding-top:60px}.container{max-width:800px;margin:0 auto;padding:1rem}.app-header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;background-color:var(--card-background);padding:0 1rem;height:60px;border-bottom:1px solid var(--border-color);z-index:1000}.app-header h1{font-size:1.2rem;margin:0}.card{background:var(--card-background);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.btn{display:inline-block;width:100%;box-sizing:border-box;padding:.9rem 1.5rem;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:transform .1s ease-out}.btn:active{transform:scale(.98)}.btn-primary{background-color:var(--primary-blue);color:#fff}.btn-secondary{background-color:transparent;color:var(--primary-blue);border:1.5px solid var(--primary-blue)}.result-summary{display:flex;justify-content:space-around;text-align:center;padding:1rem 0}.result-item .value{font-size:2.2rem;font-weight:700}.result-item .label{font-size:.9rem;color:var(--text-secondary);margin-top:.25rem}.result-icon{font-size:2rem;margin-bottom:.5rem}.correct .result-icon{color:var(--correct-color)}.marks .result-icon{color:var(--primary-blue)}.result-trophy{text-align:center;font-size:4rem;margin-bottom:1rem}</style>
+</head>
+<body>
+    <header class="app-header"><h1>Result</h1></header>
+    <div class="container">
+        <div class="card" style="text-align: center;">
+            <div class="result-trophy"><img src="https://emojipedia-us.s3.amazonaws.com/source/skype/289/star_2b50.png" alt="star" width="60"></div>
+            <h2>You could do better!</h2>
+            <div class="result-summary">
+                <div class="result-item correct"><div class="result-icon">✔</div><div class="value" id="correct-count">0/0</div><div class="label">Correct</div></div>
+                <div class="result-item marks"><div class="result-icon">➖</div><div class="value" id="marks-count">0</div><div class="label">Marks</div></div>
+            </div>
+        </div>
+        <a href="6_review.html" class="btn btn-primary">Review solutions</a>
+        <a href="index.html" class="btn btn-secondary" style="margin-top: 1rem;">Continue Practice</a>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const resultData = JSON.parse(localStorage.getItem('lastQuizResult'));
+        if (!resultData) { document.querySelector('.container').innerHTML = '<h2>No result data found.</h2>'; return; }
+        const totalQuestions = resultData.length;
+        let correctCount = 0;
+        resultData.forEach(q => { if (q.userAnswer === q.correctAnswer) { correctCount++; } });
+        const marks = (correctCount * 4) - ((totalQuestions - correctCount) * 1);
+        document.getElementById('correct-count').textContent = `${correctCount}/${totalQuestions}`;
+        document.getElementById('marks-count').textContent = marks;
+    });
+    </script>
+</body>
+</html>
