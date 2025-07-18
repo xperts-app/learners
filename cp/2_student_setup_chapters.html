@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Chapters</title>
+    <script src="data.js"></script>
+    <style>:root{--primary-blue:#3d8bff;--light-blue:#e7f1ff;--background-color:#f7f8fc;--card-background:#ffffff;--text-primary:#212529;--text-secondary:#6c757d;--border-color:#e9ecef;--shadow:0 4px 15px rgba(0,0,0,0.06);--font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}body{font-family:var(--font-family);background-color:var(--background-color);color:var(--text-primary);margin:0;padding-top:60px}.container{max-width:800px;margin:0 auto;padding:1rem}.app-header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;background-color:var(--card-background);padding:0 1rem;height:60px;border-bottom:1px solid var(--border-color);z-index:1000}.back-arrow{font-size:1.8rem;text-decoration:none;color:var(--text-primary);margin-right:1rem}.app-header h1{font-size:1.2rem;margin:0}.app-header p{font-size:.8rem;color:var(--text-secondary);margin:0}.card{background:var(--card-background);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.card-header{font-size:1.1rem;font-weight:500;margin-bottom:1rem}.btn{display:inline-block;width:100%;box-sizing:border-box;padding:.9rem 1.5rem;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:transform .1s ease-out}.btn:active{transform:scale(.98)}.btn-primary{background-color:var(--primary-blue);color:#fff}.chapter-item{display:block;padding:.8rem 0;border-bottom:1px solid var(--border-color)}.chapter-item:last-child{border-bottom:none}.chapter-item label{display:flex;align-items:center;width:100%;cursor:pointer}.chapter-item input{margin-right:1rem;width:20px;height:20px}</style>
+</head>
+<body>
+    <header class="app-header">
+        <a href="index.html" class="back-arrow">←</a>
+        <div><h1 id="subject-title">Subject</h1><p id="class-title">Class</p></div>
+    </header>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">All Chapters</div>
+            <form id="chapters-form">
+                <div id="chapters-container"></div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">Next</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const className = params.get('class'), subjectName = params.get('subject');
+            const subjectTitleEl = document.getElementById('subject-title'), classTitleEl = document.getElementById('class-title'), chaptersContainer = document.getElementById('chapters-container');
+            if (!className || !subjectName) { chaptersContainer.innerHTML = "<p>Error: Class or Subject not specified.</p>"; return; }
+            subjectTitleEl.textContent = subjectName; classTitleEl.textContent = className;
+            const chapters = academicData[className]?.[subjectName] || [];
+            if (chapters.length === 0) { chaptersContainer.innerHTML = "<p>No chapters found.</p>"; return; }
+            chapters.forEach(chapter => { chaptersContainer.innerHTML += `<div class="chapter-item"><label><input type="checkbox" name="chapter" value="${chapter}">${chapter}</label></div>`; });
+            document.getElementById('chapters-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const selectedChapters = Array.from(document.querySelectorAll('input[name="chapter"]:checked')).map(cb => cb.value);
+                if (selectedChapters.length === 0) { alert('Please select at least one chapter.'); return; }
+                sessionStorage.setItem('selectedClass', className); sessionStorage.setItem('selectedSubject', subjectName); sessionStorage.setItem('selectedChapters', JSON.stringify(selectedChapters));
+                window.location.href = '3_student_setup_options.html';
+            });
+        });
+    </script>
+</body>
+</html>
