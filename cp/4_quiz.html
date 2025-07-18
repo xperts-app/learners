@@ -3,146 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz in Progress</title>
-    
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #fff; color: #333; margin: 0; }
-        .quiz-container { max-width: 800px; margin: auto; overflow: hidden; position: relative; }
-        .quiz-wrapper { display: flex; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .question-slide { min-width: 100%; box-sizing: border-box; padding: 2rem 1.5rem; }
-        .question-header { margin-bottom: 2rem; }
-        .question-text { font-size: 1.4rem; font-weight: 500; line-height: 1.5; }
-        .option { background-color: #f0f4ff; padding: 1rem; margin-bottom: 1rem; border-radius: 12px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; }
-        .option:hover { border-color: #a8c5ff; }
-        .option.selected { border-color: #007bff; background-color: #dbeaff; font-weight: bold; }
-        .quiz-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 1rem; display: flex; justify-content: space-between; max-width: 800px; margin: auto; }
-        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-secondary { background-color: #e9ecef; color: #333; }
-        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        #question-counter { position: absolute; top: 1rem; right: 1.5rem; font-size: 0.9rem; color: #888; background: #eee; padding: 5px 10px; border-radius: 15px; }
-    </style>
+    <title>Quiz</title>
+    <style>:root{--primary-blue:#3d8bff;--light-blue:#e7f1ff;--background-color:#f7f8fc;--card-background:#ffffff;--text-primary:#212529;--text-secondary:#6c757d;--border-color:#e9ecef;--shadow:0 4px 15px rgba(0,0,0,0.06);--font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}body{font-family:var(--font-family);background-color:var(--card-background);color:var(--text-primary);margin:0;padding-top:60px;padding-bottom:100px}.container{max-width:800px;margin:0 auto;padding:1rem}.app-header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;background-color:var(--card-background);padding:0 1rem;height:60px;border-bottom:1px solid var(--border-color);z-index:1000}.back-arrow{font-size:1.8rem;text-decoration:none;color:var(--text-primary);margin-right:1rem}.app-header h1{font-size:1.2rem;margin:0}.btn{display:inline-block;width:100%;box-sizing:border-box;padding:.9rem 1.5rem;border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:transform .1s ease-out}.btn:active{transform:scale(.98)}.btn-primary{background-color:var(--primary-blue);color:#fff}.question-text{font-size:1.2rem;font-weight:500;margin-bottom:1.5rem;line-height:1.6}.question-option{display:flex;align-items:center;background-color:#f8f9fa;padding:1rem;margin-bottom:.75rem;border-radius:12px;border:2px solid #f8f9fa;cursor:pointer;transition:all .2s ease}.question-option .option-letter{display:flex;justify-content:center;align-items:center;min-width:24px;height:24px;border-radius:50%;border:1.5px solid var(--text-secondary);color:var(--text-secondary);margin-right:1rem;font-weight:700;font-size:.9rem}.question-option.selected{border-color:var(--primary-blue);background-color:var(--light-blue)}.question-option.selected .option-letter{border-color:var(--primary-blue);color:var(--primary-blue)}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:1rem;border-top:1px solid var(--border-color)}</style>
 </head>
 <body>
-
-    <div class="quiz-container">
-        <div id="question-counter"></div>
-        <div class="quiz-wrapper" id="quiz-wrapper">
-            <!-- Question slides are injected here -->
+    <header class="app-header">
+        <a href="#" onclick="if(confirm('Are you sure you want to exit the quiz?')) history.back();" class="back-arrow">×</a>
+        <h1><span id="question-counter"></span></h1>
+    </header>
+    <div class="container">
+        <div id="quiz-wrapper"></div>
+    </div>
+    <div class="bottom-nav">
+        <div class="container" style="padding: 0;">
+             <button id="next-btn" class="btn btn-primary">Next</button>
+             <button id="submit-btn" class="btn btn-primary" style="display: none;">Submit Quiz</button>
         </div>
     </div>
-
-    <div class="quiz-nav">
-        <button id="prev-btn" class="btn btn-secondary">Previous</button>
-        <button id="next-btn" class="btn btn-primary">Next</button>
-        <button id="submit-btn" class="btn btn-primary" style="display: none; background-color: #28a745;">Submit Quiz</button>
-    </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const quizWrapper = document.getElementById('quiz-wrapper');
-            const counterEl = document.getElementById('question-counter');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const submitBtn = document.getElementById('submit-btn');
-
-            const quizQuestions = JSON.parse(sessionStorage.getItem('currentQuiz'));
-            if (!quizQuestions || quizQuestions.length === 0) {
-                quizWrapper.innerHTML = `
-                    <div class="question-slide">
-                        <h2>Quiz Error</h2>
-                        <p>No questions were found for this quiz. Please go back and start a new one.</p>
-                    </div>
-                `;
-                document.querySelector('.quiz-nav').style.display = 'none';
-                return;
-            }
-
-            let currentQuestionIndex = 0;
-            const userAnswers = new Array(quizQuestions.length).fill(null);
-
-            const renderQuestions = () => {
-                quizWrapper.innerHTML = '';
-                quizQuestions.forEach((q, index) => {
-                    const slide = document.createElement('div');
-                    slide.className = 'question-slide';
-                    slide.innerHTML = `
-                        <p class="question-header">Question ${index + 1}</p>
-                        <h2 class="question-text">${q.questionText}</h2>
-                        <div class="options-container" data-question-index="${index}">
-                            <div class="option" data-option="A"><strong>A.</strong> ${q.options.A}</div>
-                            <div class="option" data-option="B"><strong>B.</strong> ${q.options.B}</div>
-                            <div class="option" data-option="C"><strong>C.</strong> ${q.options.C}</div>
-                            <div class="option" data-option="D"><strong>D.</strong> ${q.options.D}</div>
-                        </div>
-                    `;
-                    quizWrapper.appendChild(slide);
+    document.addEventListener('DOMContentLoaded', () => {
+        const quizWrapper = document.getElementById('quiz-wrapper'), counterEl = document.getElementById('question-counter'), nextBtn = document.getElementById('next-btn'), submitBtn = document.getElementById('submit-btn');
+        const quizQuestions = JSON.parse(sessionStorage.getItem('currentQuiz'));
+        if (!quizQuestions || quizQuestions.length === 0) { quizWrapper.innerHTML = `<h2>Quiz Error</h2><p>No questions found.</p>`; return; }
+        let currentQuestionIndex = 0;
+        const userAnswers = new Array(quizQuestions.length).fill(null);
+        const updateImprovementBook = (resultData) => {
+            const incorrectQuestions = resultData.filter(q => q.userAnswer && q.userAnswer !== q.correctAnswer);
+            if (incorrectQuestions.length === 0) return;
+            const improvementBook = JSON.parse(localStorage.getItem('improvementBook')) || {};
+            incorrectQuestions.forEach(q => { improvementBook[q.id] = q; });
+            localStorage.setItem('improvementBook', JSON.stringify(improvementBook));
+        };
+        const renderQuestion = () => {
+            const q = quizQuestions[currentQuestionIndex];
+            quizWrapper.innerHTML = `<p class="question-text">${q.questionText}</p><div class="options-container"><div class="question-option" data-option="A"><span class="option-letter">A</span> <span>${q.options.A}</span></div><div class="question-option" data-option="B"><span class="option-letter">B</span> <span>${q.options.B}</span></div><div class="question-option" data-option="C"><span class="option-letter">C</span> <span>${q.options.C}</span></div><div class="question-option" data-option="D"><span class="option-letter">D</span> <span>${q.options.D}</span></div></div>`;
+            document.querySelectorAll('.question-option').forEach(optionEl => {
+                optionEl.addEventListener('click', () => {
+                    const selectedOption = optionEl.dataset.option;
+                    userAnswers[currentQuestionIndex] = selectedOption;
+                    document.querySelectorAll('.question-option').forEach(opt => opt.classList.remove('selected'));
+                    optionEl.classList.add('selected');
                 });
-                addOptionListeners();
-                updateUI();
-            };
-
-            const updateUI = () => {
-                quizWrapper.style.transform = `translateX(-${currentQuestionIndex * 100}%)`;
-                counterEl.textContent = `${currentQuestionIndex + 1} / ${quizQuestions.length}`;
-                prevBtn.disabled = currentQuestionIndex === 0;
-                
-                const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
-                nextBtn.style.display = isLastQuestion ? 'none' : 'inline-block';
-                submitBtn.style.display = isLastQuestion ? 'inline-block' : 'none';
-            };
-
-            const addOptionListeners = () => {
-                document.querySelectorAll('.option').forEach(optionEl => {
-                    optionEl.addEventListener('click', () => {
-                        const questionIndex = parseInt(optionEl.parentElement.dataset.questionIndex, 10);
-                        const selectedOption = optionEl.dataset.option;
-                        userAnswers[questionIndex] = selectedOption;
-
-                        // Update visual selection for the current question's options
-                        optionEl.parentElement.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-                        optionEl.classList.add('selected');
-                        
-                        // Automatically move to the next question
-                        setTimeout(() => {
-                           if (currentQuestionIndex < quizQuestions.length - 1) {
-                               currentQuestionIndex++;
-                               updateUI();
-                           }
-                        }, 200);
-                    });
-                });
-            };
-
-            prevBtn.addEventListener('click', () => {
-                if (currentQuestionIndex > 0) {
-                    currentQuestionIndex--;
-                    updateUI();
-                }
             });
-
-            nextBtn.addEventListener('click', () => {
-                if (currentQuestionIndex < quizQuestions.length - 1) {
-                    currentQuestionIndex++;
-                    updateUI();
-                }
-            });
-
-            submitBtn.addEventListener('click', () => {
-                let correctCount = 0;
-                quizQuestions.forEach((q, i) => {
-                    if (q.correctAnswer === userAnswers[i]) {
-                        correctCount++;
-                    }
-                });
-                
-                alert(`Quiz Finished!\n\nYou scored ${correctCount} out of ${quizQuestions.length}.`);
-                // In a full app, you would redirect to a results page here.
-                window.location.href = '2_student_setup_chapters.html?class=' + sessionStorage.getItem('selectedClass') + '&subject=' + sessionStorage.getItem('selectedSubject'); // Go back to chapter selection
-            });
-
-            renderQuestions();
+            updateUI();
+        };
+        const updateUI = () => {
+            counterEl.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+            const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
+            nextBtn.style.display = isLastQuestion ? 'none' : 'block';
+            submitBtn.style.display = isLastQuestion ? 'block' : 'none';
+            const selected = userAnswers[currentQuestionIndex];
+            if (selected) { document.querySelector(`.question-option[data-option="${selected}"]`).classList.add('selected'); }
+        };
+        nextBtn.addEventListener('click', () => { if (currentQuestionIndex < quizQuestions.length - 1) { currentQuestionIndex++; renderQuestion(); }});
+        submitBtn.addEventListener('click', () => {
+            const resultData = quizQuestions.map((q, i) => ({ ...q, userAnswer: userAnswers[i] }));
+            localStorage.setItem('lastQuizResult', JSON.stringify(resultData));
+            updateImprovementBook(resultData);
+            window.location.href = "5_result.html";
         });
+        renderQuestion();
+    });
     </script>
 </body>
 </html>
