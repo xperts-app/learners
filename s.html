@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portrait YouTube Player with Fullscreen</title>
+  <title>YT Player with Auto Fullscreen Rotate</title>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -28,13 +28,6 @@
       margin: 0;
       background: black;
       font-family: sans-serif;
-    }
-    .fullscreen {
-      position: fixed !important;
-      top: 0; left: 0;
-      width: 100vw !important;
-      height: 100vh !important;
-      z-index: 9999;
     }
   </style>
 </head>
@@ -155,7 +148,6 @@
       document.getElementById("volumeControl").oninput = e =>
         player.setVolume(parseInt(e.target.value));
 
-      // Brightness / Volume zone click
       document.getElementById("container").addEventListener("click", e => {
         const x = e.clientX;
         const w = window.innerWidth;
@@ -171,14 +163,29 @@
       });
 
       // Fullscreen toggle
-      document.getElementById("fullscreenBtn").onclick = () => {
+      const fullscreenBtn = document.getElementById("fullscreenBtn");
+      fullscreenBtn.onclick = async () => {
         const container = document.getElementById("container");
         if (!document.fullscreenElement) {
-          container.requestFullscreen?.();
+          await container.requestFullscreen();
+          if (screen.orientation && screen.orientation.lock) {
+            try {
+              await screen.orientation.lock("landscape");
+            } catch (err) {
+              console.warn("Orientation lock failed:", err);
+            }
+          }
         } else {
-          document.exitFullscreen?.();
+          await document.exitFullscreen();
         }
       };
+
+      // Auto-unlock orientation on fullscreen exit
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement && screen.orientation?.unlock) {
+          screen.orientation.unlock?.();
+        }
+      });
 
       updateLoop();
     }
