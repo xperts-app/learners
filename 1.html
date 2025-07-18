@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Clean Custom YT Player</title>
+  <title>Hotstar-style YouTube Player</title>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -11,30 +11,17 @@
       margin: 0;
       padding: 0;
       background: black;
+      overflow: hidden;
     }
-
     .slider-vertical {
       writing-mode: bt-lr;
       -webkit-appearance: slider-vertical;
-      height: 150px;
-      width: 30px;
+      height: 140px;
+      width: 25px;
       transform: rotate(180deg);
       pointer-events: auto;
       opacity: 0.7;
     }
-
-    #overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 370px;
-      z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-
     .yt-container {
       position: relative;
       width: calc(100% + 40px);
@@ -43,53 +30,85 @@
       top: -20px;
       overflow: hidden;
     }
-
-    iframe {
-      pointer-events: auto !important;
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 370px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #centerControls {
+      pointer-events: auto;
+    }
+    .settings-menu {
+      position: absolute;
+      bottom: 50px;
+      right: 10px;
+      background: rgba(30, 30, 30, 0.95);
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+    #lockOverlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: center;
     }
   </style>
 </head>
 <body class="text-white">
-
   <div class="w-screen flex flex-col relative overflow-hidden">
     <div class="relative w-full h-[370px]">
-      <!-- Video with offset -->
       <div class="yt-container" id="player"></div>
-
-      <!-- Overlay sliders -->
-      <div id="overlay">
-        <!-- Brightness Left -->
+      <div id="overlay" class="flex justify-between items-center px-1">
         <div class="flex items-center bg-black/40 rounded-r">
           <input type="range" id="brightnessControl" min="0.2" max="2" step="0.1" value="1" class="slider-vertical" />
         </div>
-        <!-- Volume Right -->
+        <div id="centerControls" class="absolute inset-0 flex justify-center items-center">
+          <button id="centerPlayPause" class="bg-white/20 p-4 rounded-full text-3xl">▶️</button>
+        </div>
         <div class="flex items-center bg-black/40 rounded-l">
           <input type="range" id="volumeOverlayControl" min="0" max="100" value="100" class="slider-vertical" />
         </div>
       </div>
+      <div id="lockOverlay" class="absolute flex">
+        <button id="unlockBtn" class="bg-white/20 px-4 py-2 rounded text-xl">🔓 Unlock</button>
+      </div>
     </div>
-
-    <!-- Custom Controls -->
-    <div class="bg-gray-900/90 p-3 flex items-center gap-3 text-sm">
+    <div class="bg-gray-900/90 p-3 flex items-center gap-3 text-sm relative">
       <button id="playPauseBtn">▶️</button>
       <input type="range" id="progressBar" value="0" min="0" max="100" class="w-full" />
       <span id="timeLabel" class="min-w-[80px] text-right text-xs">0:00 / 0:00</span>
-      <select id="speedControl" class="bg-gray-800 text-white text-xs rounded px-1">
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="1.5">1.5×</option>
-        <option value="2">2×</option>
-      </select>
-      <input id="volumeControl" type="range" min="0" max="100" value="100" class="w-20" />
-      <button id="fullscreenBtn" class="ml-auto bg-gray-700 px-2 py-1 rounded text-xs">🔳 Fullscreen</button>
+      <button id="settingsBtn" class="ml-auto text-xl">⚙️</button>
+      <button id="fullscreenBtn" class="text-xs bg-gray-700 px-2 py-1 rounded">🔳</button>
+      <button id="lockBtn" class="text-xs bg-red-600 px-2 py-1 rounded">🔒</button>
+      <div id="settingsMenu" class="settings-menu">
+        <label class="block mb-2">Speed
+          <select id="speedControl" class="w-full mt-1">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.5">1.5×</option>
+            <option value="2">2×</option>
+          </select>
+        </label>
+        <label class="block">Quality (demo only)
+          <select disabled class="w-full mt-1">
+            <option>Auto</option>
+            <option>720p</option>
+            <option>480p</option>
+          </select>
+        </label>
+      </div>
     </div>
   </div>
-
   <script>
-    let player;
-    let isPlaying = false;
-    let duration = 0;
-
+    let player, isPlaying = false, duration = 0;
     function getYouTubeID(url) {
       try {
         const parsed = new URL(url);
@@ -98,13 +117,11 @@
       } catch { return null; }
       return null;
     }
-
     function formatTime(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
       return `${m}:${s.toString().padStart(2, '0')}`;
     }
-
     function onYouTubeIframeAPIReady() {
       const params = new URLSearchParams(window.location.search);
       const url = params.get("url");
@@ -113,7 +130,6 @@
         document.getElementById("player").innerHTML = "<p class='text-white p-4'>Invalid or missing YouTube URL.</p>";
         return;
       }
-
       player = new YT.Player("player", {
         videoId,
         playerVars: {
@@ -131,56 +147,56 @@
         }
       });
     }
-
     function onPlayerReady() {
       duration = player.getDuration();
-
-      document.getElementById("playPauseBtn").onclick = () => {
-        isPlaying ? player.pauseVideo() : player.playVideo();
-      };
-
-      document.getElementById("progressBar").oninput = (e) => {
+      const progressBar = document.getElementById("progressBar");
+      const playPauseBtn = document.getElementById("playPauseBtn");
+      const centerBtn = document.getElementById("centerPlayPause");
+      playPauseBtn.onclick = togglePlayPause;
+      centerBtn.onclick = togglePlayPause;
+      progressBar.oninput = (e) => {
         const seek = (e.target.value / 100) * duration;
         player.seekTo(seek, true);
       };
-
       document.getElementById("speedControl").onchange = (e) => {
         player.setPlaybackRate(parseFloat(e.target.value));
       };
-
-      document.getElementById("volumeControl").oninput = (e) => {
-        player.setVolume(parseInt(e.target.value));
-        document.getElementById("volumeOverlayControl").value = e.target.value;
-      };
-
       document.getElementById("volumeOverlayControl").oninput = (e) => {
         player.setVolume(parseInt(e.target.value));
-        document.getElementById("volumeControl").value = e.target.value;
       };
-
       document.getElementById("brightnessControl").oninput = (e) => {
-        const val = parseFloat(e.target.value);
-        document.getElementById("player").style.filter = `brightness(${val})`;
+        document.getElementById("player").style.filter = `brightness(${parseFloat(e.target.value)})`;
       };
-
       document.getElementById("fullscreenBtn").onclick = () => {
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().then(() => {
-            screen.orientation.lock('landscape').catch(() => {});
+            screen.orientation.lock("landscape").catch(() => {});
           });
         } else {
           document.exitFullscreen();
         }
       };
-
+      document.getElementById("settingsBtn").onclick = () => {
+        const menu = document.getElementById("settingsMenu");
+        menu.style.display = menu.style.display === "none" ? "block" : "none";
+      };
+      document.getElementById("lockBtn").onclick = () => {
+        document.getElementById("lockOverlay").style.display = "flex";
+      };
+      document.getElementById("unlockBtn").onclick = () => {
+        document.getElementById("lockOverlay").style.display = "none";
+      };
       updateLoop();
     }
-
     function onPlayerStateChange(e) {
       isPlaying = e.data === YT.PlayerState.PLAYING;
-      document.getElementById("playPauseBtn").textContent = isPlaying ? '⏸️' : '▶️';
+      const icon = isPlaying ? '⏸️' : '▶️';
+      document.getElementById("playPauseBtn").textContent = icon;
+      document.getElementById("centerPlayPause").textContent = icon;
     }
-
+    function togglePlayPause() {
+      isPlaying ? player.pauseVideo() : player.playVideo();
+    }
     function updateLoop() {
       if (player && player.getCurrentTime) {
         const current = player.getCurrentTime();
@@ -191,7 +207,6 @@
       }
       requestAnimationFrame(updateLoop);
     }
-
     window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
   </script>
 </body>
