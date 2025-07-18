@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Custom YT Player</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+    }
+    .progress-bar::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 14px;
+      width: 14px;
+      background: white;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body class="text-white overflow-hidden">
+
+  <div class="flex flex-col w-screen" style="height: 100vh; max-height: 100vh;">
+    <!-- YouTube Player Container -->
+    <div id="player" class="w-full" style="height: 370px;"></div>
+
+    <!-- Custom Controls -->
+    <div class="bg-gray-900/90 p-3 flex items-center gap-3 text-sm">
+      <!-- Play/Pause -->
+      <button id="playPauseBtn">
+        <svg id="playIcon" class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M5 3l14 9-14 9V3z"/>
+        </svg>
+        <svg id="pauseIcon" class="w-6 h-6 hidden" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M6 4h4v16H6zM14 4h4v16h-4z"/>
+        </svg>
+      </button>
+
+      <!-- Progress Bar -->
+      <input type="range" id="progressBar" value="0" min="0" max="100"
+        class="progress-bar w-full h-2 bg-white/30 rounded"/>
+
+      <!-- Time Display -->
+      <span id="timeLabel" class="text-xs text-gray-300 min-w-[90px] text-right">0:00 / 0:00</span>
+
+      <!-- Speed Control -->
+      <select id="speedControl" class="bg-gray-800 text-white rounded px-2 py-1">
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.5">1.5×</option>
+        <option value="2">2×</option>
+      </select>
+
+      <!-- Volume -->
+      <input id="volumeControl" type="range" min="0" max="100" value="100"
+        class="w-24 h-2 bg-white/30 rounded"/>
+
+      <!-- Fullscreen Toggle -->
+      <button id="fullscreenBtn" class="ml-auto bg-gray-700 px-2 py-1 rounded text-xs">
+        🔳 Fullscreen
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let player;
+    let isPlaying = false;
+    let duration = 0;
+
+    function getYouTubeID(url) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname === 'youtu.be') return parsed.pathname.slice(1);
+        if (parsed.hostname.includes('youtube.com')) return parsed.searchParams.get('v');
+      } catch {
+        return null;
+      }
+      return null;
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function onYouTubeIframeAPIReady() {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get("url");
+      const videoId = getYouTubeID(url);
+
+      if (!videoId) {
+        document.getElementById("player").innerHTML = "<p class='text-white p-4'>Invalid or missing YouTube URL.</p>";
+        return;
+      }
+
+      player = new YT.Player("player", {
+        videoId,
+        playerVars: {
+          controls: 0,
+          modestbranding: 1,
+          rel: 0
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady() {
+      duration = player.getDuration();
+
+      document.getElementById("playPauseBtn").onclick = () => {
+        isPlaying ? player.pauseVideo() : player.playVideo();
+      };
+
+      document.getElementById("progressBar").oninput = (e) => {
+        const seek = (e.target.value / 100) * duration;
+        player.seekTo(seek, true);
+      };
+
+      document.getElementById("speedControl").onchange = (e) => {
+        player.setPlaybackRate(parseFloat(e.target.value));
+      };
+
+      document.getElementById("volumeControl").oninput = (e) => {
+        player.setVolume(parseInt(e.target.value));
+      };
+
+      document.getElementById("fullscreenBtn").onclick = toggleFullscreen;
+
+      updateLoop();
+    }
+
+    function onPlayerStateChange(e) {
+      isPlaying = e.data === YT.PlayerState.PLAYING;
+      document.getElementById("playIcon").classList.toggle("hidden", isPlaying);
+      document.getElementById("pauseIcon").classList.toggle("hidden", !isPlaying);
+    }
+
+    function updateLoop() {
+      if (player && player.getCurrentTime) {
+        const current = player.getCurrentTime();
+        duration = player.getDuration();
+        const progress = (current / duration) * 100;
+        document.getElementById("progressBar").value = progress || 0;
+        document.getElementById("timeLabel").textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+      }
+      requestAnimationFrame(updateLoop);
+    }
+
+    function toggleFullscreen() {
+      const container = document.documentElement;
+      if (!document.fullscreenElement) {
+        container.requestFullscreen().then(() => {
+          screen.orientation.lock("landscape").catch(() => {});
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+  </script>
+</body>
+</html>
