@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Answers</title>
+    <style>:root{--primary-blue:#3d8bff;--light-blue:#e7f1ff;--background-color:#f7f8fc;--card-background:#ffffff;--text-primary:#212529;--text-secondary:#6c757d;--border-color:#e9ecef;--correct-color:#28a745;--incorrect-color:#dc3545;--correct-bg:#d4edda;--incorrect-bg:#f8d7da;--shadow:0 4px 15px rgba(0,0,0,0.06);--font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}body{font-family:var(--font-family);background-color:var(--background-color);color:var(--text-primary);margin:0;padding-top:120px}.container{max-width:800px;margin:0 auto;padding:1rem}.app-header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;background-color:var(--card-background);padding:0 1rem;height:60px;border-bottom:1px solid var(--border-color);z-index:1000}.back-arrow{font-size:1.8rem;text-decoration:none;color:var(--text-primary);margin-right:1rem}.app-header h1{font-size:1.2rem;margin:0}.tabs{position:fixed;top:60px;left:0;right:0;display:flex;justify-content:space-around;background-color:var(--card-background);padding:0 1rem;border-bottom:1px solid var(--border-color);margin-bottom:1.5rem;z-index:1000}.tabs a{padding:1rem .5rem;text-decoration:none;color:var(--text-secondary);font-weight:500;border-bottom:3px solid transparent;transition:all .2s ease-in-out;cursor:pointer}.tabs a.active{color:var(--text-primary);border-bottom-color:var(--primary-blue)}.card{background:var(--card-background);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)}.question-text{font-size:1.2rem;font-weight:500;margin-bottom:1.5rem;line-height:1.6}.review-option{border-radius:12px;padding:1rem;margin-bottom:.75rem;border:2px solid #f8f9fa;background-color:#f8f9fa}.review-option.correct-answer{border-color:var(--correct-color);background-color:var(--correct-bg)}.review-option.wrong-answer{border-color:var(--incorrect-color);background-color:var(--incorrect-bg)}</style>
+</head>
+<body>
+    <header class="app-header">
+        <a href="5_result.html" class="back-arrow">←</a><h1>Review Answers</h1>
+    </header>
+    <div class="tabs">
+        <a id="tab-incorrect" class="active">Incorrect</a><a id="tab-unattempted">Unattempted</a><a id="tab-correct">Correct</a>
+    </div>
+    <div class="container" id="review-container"></div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const resultData = JSON.parse(localStorage.getItem('lastQuizResult')), container = document.getElementById('review-container');
+        if (!resultData) { container.innerHTML = '<h2>No result data to review.</h2>'; return; }
+        const incorrect = resultData.filter(q => q.userAnswer && q.userAnswer !== q.correctAnswer), correct = resultData.filter(q => q.userAnswer === q.correctAnswer), unattempted = resultData.filter(q => !q.userAnswer);
+        const renderQuestions = (questions) => {
+            container.innerHTML = '';
+            if (questions.length === 0) { container.innerHTML = '<div class="card" style="text-align:center;"><p>Nothing to show here.</p></div>'; return; }
+            questions.forEach((q) => {
+                const item = document.createElement('div'); item.className = 'card';
+                item.innerHTML = `<p class="question-text">${q.questionText}</p><div class="review-options">${Object.keys(q.options).map(key => { let optionClass = 'review-option'; if (key === q.correctAnswer) { optionClass += ' correct-answer'; } else if (key === q.userAnswer) { optionClass += ' wrong-answer'; } return `<div class="${optionClass}"><b>${key}:</b> ${q.options[key]}</div>`; }).join('')}</div><hr><p><b>Your Answer:</b> ${q.userAnswer || 'Not Answered'}</p><p><b>Correct Answer:</b> ${q.correctAnswer}</p><div style="background: #e7f1ff; padding: 1rem; border-radius: 8px;"><b>Solution:</b> ${q.solution}</div>`;
+                container.appendChild(item);
+            });
+        };
+        const setActiveTab = (tabId) => { document.querySelectorAll('.tabs a').forEach(t => t.classList.remove('active')); document.getElementById(tabId).classList.add('active'); };
+        document.getElementById('tab-incorrect').addEventListener('click', () => { setActiveTab('tab-incorrect'); renderQuestions(incorrect); });
+        document.getElementById('tab-unattempted').addEventListener('click', () => { setActiveTab('tab-unattempted'); renderQuestions(unattempted); });
+        document.getElementById('tab-correct').addEventListener('click', () => { setActiveTab('tab-correct'); renderQuestions(correct); });
+        renderQuestions(incorrect);
+    });
+    </script>
+</body>
+</html>
