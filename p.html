@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Xperts PDF Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      text-align: center;
+      padding: 2em;
+    }
+    .logo {
+      font-size: 2em;
+      font-weight: bold;
+      color: #0074D9;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">📘 Xperts PDF Viewer</div>
+  <p>Loading your document...</p>
+
+  <script>
+    // Get PDF URL from query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const pdfUrl = urlParams.get("");
+
+    if (!pdfUrl) {
+      document.body.innerHTML += "<p style='color:red;'>❌ No PDF URL provided.</p>";
+    } else {
+      // Redirect to PDF.js viewer with the PDF file URL
+      const viewerUrl = `/pdfjs/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`;
+      window.location.href = viewerUrl;
+    }
+  </script>
+</body>
+</html>
