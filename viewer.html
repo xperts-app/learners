@@ -4,71 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Xperts PDF Viewer</title>
+  <link rel="manifest" href="manifest.json" />
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: #f4f4f4;
-    }
-    h2 {
-      text-align: center;
-      padding: 10px;
-      background: #007BFF;
-      color: white;
-      margin: 0;
-    }
-    #toolbar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px;
-      background: #fff;
-    }
+    body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
+    h2 { text-align: center; padding: 10px; background: #007BFF; color: white; margin: 0; }
+    #toolbar { display: flex; justify-content: center; gap: 10px; padding: 10px; background: #fff; }
     #toolbar button {
-      background: #007BFF;
-      border: none;
-      color: white;
-      padding: 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
+      background: #007BFF; border: none; color: white; padding: 8px 12px;
+      border-radius: 4px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px;
     }
-    #toolbar svg {
-      width: 16px;
-      height: 16px;
-      fill: white;
-    }
-    #pdf-viewer {
-      max-width: 400px;
-      margin: 0 auto;
-      padding: 10px;
-    }
-    canvas {
-      width: 100% !important;
-      height: auto !important;
-      margin-bottom: 10px;
-      background: white;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
+    #toolbar svg { width: 16px; height: 16px; fill: white; }
+    #pdf-viewer { max-width: 400px; margin: 0 auto; padding: 10px; }
+    canvas { width: 100% !important; margin-bottom: 10px; background: white; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
   <h2>Xperts PDF Viewer</h2>
   <div id="toolbar">
     <button id="downloadPDF" title="Download">
-      <svg viewBox="0 0 24 24">
-        <path d="M5 20h14v-2H5v2zm7-18v12l4-4h-3V4h-2v6H8l4 4z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18v12l4-4h-3V4h-2v6H8l4 4z"/></svg>
       Download
     </button>
   </div>
   <div id="pdf-viewer"></div>
 
-  <!-- PDF.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
     const viewer = document.getElementById('pdf-viewer');
@@ -91,12 +50,9 @@
             viewer.appendChild(canvas);
           });
         }
-      }).catch(err => {
-        viewer.innerHTML = `<p style="color:red;">Error loading PDF: ${err.message}</p>`;
       });
     }
 
-    // Download button → save PDF to IndexedDB
     document.getElementById('downloadPDF').onclick = async () => {
       const response = await fetch(pdfUrl);
       const blob = await response.blob();
@@ -104,27 +60,29 @@
       reader.onload = function () {
         const arrayBuffer = this.result;
         const request = indexedDB.open('XpertsDB', 1);
-
-        request.onupgradeneeded = function (e) {
+        request.onupgradeneeded = e => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('pdfs')) {
             db.createObjectStore('pdfs');
           }
         };
-
-        request.onsuccess = function (e) {
+        request.onsuccess = e => {
           const db = e.target.result;
           const tx = db.transaction('pdfs', 'readwrite');
           const store = tx.objectStore('pdfs');
           store.put(arrayBuffer, 'saved-pdf');
           tx.oncomplete = () => {
-            alert("✅ PDF saved locally! You can open it offline via download.html.");
+            alert("✅ PDF saved locally! You can view it offline via download.html");
           };
         };
       };
       reader.readAsArrayBuffer(blob);
     };
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
   </script>
 </body>
 </html>
-
