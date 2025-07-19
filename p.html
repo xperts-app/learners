@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Xperts PDF Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f9f9f9;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    #pdf-viewer {
+      width: 100%;
+      max-width: 370px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+    #message {
+      color: red;
+      margin-top: 15px;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Xperts - Quick PDF View</h2>
+  <div id="pdf-viewer"></div>
+  <div id="message"></div>
+
+  <!-- Lightweight PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const viewer = document.getElementById('pdf-viewer');
+    const message = document.getElementById('message');
+    const params = new URLSearchParams(window.location.search);
+    const pdfUrl = params.get('p');
+
+    if (!pdfUrl) {
+      message.textContent = "Missing PDF URL (?p=...)";
+    } else {
+      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      loadingTask.promise.then(pdf => {
+        pdf.getPage(1).then(page => {
+          const scale = 1;
+          const viewport = page.getViewport({ scale });
+
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          page.render({ canvasContext: context, viewport }).promise.then(() => {
+            viewer.appendChild(canvas);
+          });
+        });
+      }).catch(err => {
+        message.textContent = "Failed to load PDF. Check the link or CORS settings.";
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>
